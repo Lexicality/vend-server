@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 )
 
 func readStreamer() <-chan string {
@@ -19,6 +20,8 @@ func readStreamer() <-chan string {
 			} else if err != nil {
 				log.Fatal("Unable to read from stdin: %s", err)
 			}
+
+			text = strings.TrimSpace(text)
 
 			// Never send an empty string since that's what closed channels do
 			if text != "" {
