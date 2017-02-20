@@ -4,21 +4,24 @@
   <script language="javascript" type="text/javascript">
 
   var wsUri = "ws://localhost:8080/ws/";
-  var output;
+  var output, websocket;
 
   function init()
   {
+    console.log("Hello world!");
     output = document.getElementById("output");
     testWebSocket();
   }
 
   function testWebSocket()
   {
+    console.log("Connecting!")
     websocket = new WebSocket(wsUri);
     websocket.onopen = function(evt) { onOpen(evt) };
     websocket.onclose = function(evt) { onClose(evt) };
     websocket.onmessage = function(evt) { onMessage(evt) };
     websocket.onerror = function(evt) { onError(evt) };
+    console.log("Really attempting to connect srrrs")
   }
 
   function onOpen(evt)
@@ -51,6 +54,7 @@
 
   function writeToScreen(message)
   {
+    console.info(message)
     var pre = document.createElement("p");
     pre.style.wordWrap = "break-word";
     pre.innerHTML = message;
