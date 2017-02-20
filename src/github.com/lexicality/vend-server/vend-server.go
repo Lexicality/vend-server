@@ -12,6 +12,10 @@ var log = logging.MustGetLogger("test")
 
 func main() {
 	fmt.Println("Hello World")
+
+	messagePub(readStreamer())
+	go handlePubSub()
+
 	m := martini.Classic()
 	m.Get("/", func() string {
 		return "Hello world!"
@@ -21,4 +25,5 @@ func main() {
 	})
 	m.Get("/ws", wsHandler)
 	m.RunOnAddr(":8080")
+	log.Fatal("Web server stopped?")
 }
