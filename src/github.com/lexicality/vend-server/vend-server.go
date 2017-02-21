@@ -15,6 +15,7 @@ func main() {
 
 	messagePub(readStreamer())
 	go handlePubSub()
+	go tcpServer(":8081")
 
 	m := martini.Classic()
 	m.Get("/", func() string {
