@@ -9,6 +9,8 @@ import (
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
+	// Disable security until I sort out the client
+	CheckOrigin: func(r *http.Request) bool { return true },
 }
 
 // Discard function to keep socket alive
@@ -52,7 +54,7 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 
 		err = conn.WriteMessage(websocket.TextMessage, []byte(msg))
 		if err != nil {
-			log.Error("Unable to send message %s!", msg)
+			log.Error("Unable to send message %s: %s", msg, err)
 			return
 		}
 	}
