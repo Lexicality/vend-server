@@ -22,7 +22,7 @@ func main() {
 		return "Hello world!"
 	})
 	m.Get("/test", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "src/github.com/lexicality/vend-server/www-src/test.html")
+		http.ServeFile(w, r, "src/github.com/lexicality/vending/server/www-src/test.html")
 	})
 	m.Get("/ws", wsHandler)
 	m.RunOnAddr(":8080")
