@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/op/go-logging"
+	"github.com/lexicality/vending/shared"
 )
 
-var log = logging.MustGetLogger("Vend-client")
+var log = shared.GetLogger("client")
 
 func main() {
 	log.Info("Startup!")

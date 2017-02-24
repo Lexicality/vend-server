@@ -5,10 +5,10 @@ import (
 	"net/http"
 
 	"github.com/go-martini/martini"
-	"github.com/op/go-logging"
+	"github.com/lexicality/vending/shared"
 )
 
-var log = logging.MustGetLogger("test")
+var log = shared.GetLogger("server")
 
 func main() {
 	fmt.Println("Hello World")
