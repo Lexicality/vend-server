@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/websocket"
+	"github.com/lexicality/vending/shared"
 )
 
 var upgrader = websocket.Upgrader{
@@ -13,13 +14,44 @@ var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool { return true },
 }
 
-// Discard function to keep socket alive
-func readLoop(c *websocket.Conn) {
+func wsWriteLoop(conn *shared.WSConn) {
+
+	msgChan := messageSub()
+	pingChang := conn.GetPingTicker()
+
+	var msg string
+	var err error
+	var ok bool
 	for {
-		if _, _, err := c.NextReader(); err != nil {
-			log.Noticef("Connection closed: %s", err)
-			c.Close()
-			break
+		select {
+		case msg, ok = <-msgChan:
+			if !ok {
+				log.Info("Killing connection due to channel closure")
+				return
+			} else if !conn.IsOpen() {
+				log.Debug("Killing write loop due to connection closure")
+				return
+			}
+
+			err = conn.WriteMessage(websocket.TextMessage, []byte(msg))
+			if err != nil {
+				log.Error("Unable to send message %s: %s", msg, err)
+				return
+			}
+		case _ = <-pingChang:
+			if conn.IsTimingOut() {
+				log.Info("Killing connection due to timeout")
+				return
+			} else if !conn.IsOpen() {
+				log.Debug("Killing write loop due to connection closure")
+				return
+			}
+
+			err = conn.MaybeSendPing()
+			if err != nil {
+				log.Error("Unable to send ping: %s", err)
+				return
+			}
 		}
 	}
 }
@@ -28,34 +60,20 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 	log.Notice("Connection attempt begining")
 	var err error
 
-	conn, err := upgrader.Upgrade(w, r, nil)
+	c, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Error(err)
 		w.WriteHeader(500)
 		w.Write([]byte(err.Error()))
 		return
 	}
-	defer conn.Close()
+	var conn = shared.NewWSConn(c)
+	defer c.Close()
 
-	go readLoop(conn)
 	_ = conn.WriteMessage(websocket.TextMessage, []byte("hi!"))
 
-	data := messageSub()
-
-	var msg string
-	for {
-		msg = <-data
-
-		// Check for being booted off the channel
-		if msg == "" {
-			log.Info("Killing connection due to channel closure")
-			break
-		}
-
-		err = conn.WriteMessage(websocket.TextMessage, []byte(msg))
-		if err != nil {
-			log.Error("Unable to send message %s: %s", msg, err)
-			return
-		}
-	}
+	// Ignore anything the client has to say
+	go conn.ReadDiscardPump()
+	// Tell them all the important things we have to say
+	wsWriteLoop(conn)
 }

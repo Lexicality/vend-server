@@ -2,33 +2,19 @@ package main
 
 import (
 	"github.com/gorilla/websocket"
+	"github.com/lexicality/vending/shared"
 )
-
-var dialer = websocket.Dialer{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-}
-
-// Discard function to keep socket alive
-func readLoop(c *websocket.Conn) {
-	for {
-		if _, _, err := c.NextReader(); err != nil {
-			log.Noticef("Connection closed: %s", err)
-			c.Close()
-			break
-		}
-	}
-}
 
 func wsHandler(server string) {
 	log.Notice("Connection attempt begining")
 	var err error
 
-	conn, _, err := dialer.Dial(server, nil)
+	c, _, err := websocket.DefaultDialer.Dial(server, nil)
 	if err != nil {
 		log.Errorf("Unable to connect to server: %s", err)
 		return
 	}
+	var conn = shared.NewWSConn(c)
 	defer conn.Close()
 
 	err = conn.WriteMessage(websocket.TextMessage, []byte("hi!"))
@@ -46,6 +32,7 @@ func wsHandler(server string) {
 			continue
 		}
 
+		conn.MessageRecieved()
 		log.Debugf("MESSAGE: %s", msg)
 	}
 }
