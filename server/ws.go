@@ -35,7 +35,7 @@ func wsWriteLoop(conn *shared.WSConn) {
 
 			err = conn.WriteMessage(websocket.TextMessage, []byte(msg))
 			if err != nil {
-				log.Error("Unable to send message %s: %s", msg, err)
+				log.Errorf("Unable to send message %s: %s", msg, err)
 				return
 			}
 		case _ = <-pingChang:
@@ -49,7 +49,7 @@ func wsWriteLoop(conn *shared.WSConn) {
 
 			err = conn.MaybeSendPing()
 			if err != nil {
-				log.Error("Unable to send ping: %s", err)
+				log.Errorf("Unable to send ping: %s", err)
 				return
 			}
 		}
