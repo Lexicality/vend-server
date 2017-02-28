@@ -33,6 +33,31 @@ func renderItem(params martini.Params, r render.Render, stock *Stock) {
 	r.HTML(200, "item", item)
 }
 
+type vendRenderdata struct {
+	Item *StockItem
+}
+
+func renderVendItem(params martini.Params, r render.Render, stock *Stock) {
+	item, err := stock.GetItem(params["ID"])
+	if err != nil {
+		log.Errorf("Unable to get item details for %s: %s", params["ID"], err)
+		r.HTML(500, "500", nil)
+		return
+	} else if item == nil {
+		r.HTML(404, "404", nil)
+		return
+	}
+
+	err = stock.VendItem(params["ID"])
+	if err != nil {
+		log.Errorf("Unable to vend item %s: %s", params["ID"], err)
+		r.HTML(500, "500", nil)
+		return
+	}
+
+	r.HTML(200, "vend", &vendRenderdata{Item: item})
+}
+
 func webServer(addr, webRoot string, stock *Stock) {
 	m := martini.Classic()
 	m.Use(render.Renderer(render.Options{
@@ -52,6 +77,7 @@ func webServer(addr, webRoot string, stock *Stock) {
 
 	m.Get("/", renderHome)
 	m.Get("/items/:ID", renderItem)
+	m.Get("/items/:ID/vend", renderVendItem)
 	m.Get("/ws", wsHandler)
 	m.NotFound(render404)
 
