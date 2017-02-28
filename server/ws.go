@@ -3,6 +3,8 @@ package main
 import (
 	"net/http"
 
+	"net"
+
 	"github.com/gorilla/websocket"
 	"github.com/lexicality/vending/shared"
 )
@@ -23,24 +25,25 @@ func wsWriteLoop(conn *shared.WSConn) {
 	var err error
 	var ok bool
 	for {
+		err = nil
+		msg = ""
 		select {
 		case msg, ok = <-msgChan:
 			if !ok {
 				log.Info("Killing connection due to channel closure")
+				conn.Close()
 				return
 			} else if !conn.IsOpen() {
 				log.Debug("Killing write loop due to connection closure")
 				return
 			}
 
+			conn.SetWriteDeadline(conn.GetWriteDeadline())
 			err = conn.WriteMessage(websocket.TextMessage, []byte(msg))
-			if err != nil {
-				log.Errorf("Unable to send message %s: %s", msg, err)
-				return
-			}
 		case _ = <-pingChang:
 			if conn.IsTimingOut() {
-				log.Info("Killing connection due to timeout")
+				log.Info("Killing connection due to ping timeout")
+				conn.Close()
 				return
 			} else if !conn.IsOpen() {
 				log.Debug("Killing write loop due to connection closure")
@@ -48,10 +51,29 @@ func wsWriteLoop(conn *shared.WSConn) {
 			}
 
 			err = conn.MaybeSendPing()
-			if err != nil {
-				log.Errorf("Unable to send ping: %s", err)
+		}
+
+		if err == nil {
+			continue
+		}
+
+		// ERROR HANDLING YEAH
+		switch v := err.(type) {
+		case net.Error:
+			if v.Timeout() {
+				log.Info("Killing connection due to write timeout")
+				conn.Close()
 				return
 			}
+		case *websocket.CloseError:
+			// ?
+		}
+
+		// "idk lol"
+		if msg != "" {
+			log.Errorf("Unable to send message %s: %s", msg, err)
+		} else {
+			log.Errorf("Unable to send message: %s", err)
 		}
 	}
 }
