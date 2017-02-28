@@ -16,8 +16,10 @@ const (
 func main() {
 	fmt.Println("Hello World")
 
+	stock := GetFakeStock()
+
 	messagePub(readStreamer())
 	go handlePubSub()
 	go tcpServer(":8081")
-	webServer(":8080", webRoot)
+	webServer(":8080", webRoot, stock)
 }
