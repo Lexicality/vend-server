@@ -1,8 +1,11 @@
 package main
 
 import (
+	"encoding/json"
+
 	"github.com/gorilla/websocket"
 	"github.com/lexicality/vending/shared"
+	"github.com/lexicality/vending/shared/vending"
 )
 
 func wsHandler(server string) {
@@ -34,5 +37,14 @@ func wsHandler(server string) {
 
 		conn.MessageRecieved()
 		log.Debugf("MESSAGE: %s", msg)
+
+		req := vending.Request{}
+		err = json.Unmarshal(msg, &req)
+		if err != nil {
+			log.Infof("Not a request!")
+			continue
+		}
+
+		vendItem(req.Location)
 	}
 }
