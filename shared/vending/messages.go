@@ -7,9 +7,9 @@ import (
 // Request represents a vending request from the server to the vending machine
 type Request struct {
 	// Location is the ID of the motorised arm thing it's in
-	Location uint8
+	Location uint8 `json:"location"`
 	// ID identifies the request to make reporting errors easier
-	ID uuid.UUID
+	ID uuid.UUID `json:"id"`
 }
 
 func NewRequest(location uint8) *Request {
