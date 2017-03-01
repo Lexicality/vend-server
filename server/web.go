@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/go-martini/martini"
+	"github.com/lexicality/vending/shared/vending"
 	"github.com/martini-contrib/render"
 )
 
@@ -34,7 +35,9 @@ func renderItem(params martini.Params, r render.Render, stock *Stock) {
 }
 
 type vendRenderdata struct {
-	Item *StockItem
+	Item    *StockItem
+	Result  vending.Result
+	Results map[string]vending.Result
 }
 
 func renderVendItem(params martini.Params, r render.Render, stock *Stock) {
@@ -48,14 +51,18 @@ func renderVendItem(params martini.Params, r render.Render, stock *Stock) {
 		return
 	}
 
-	err = stock.VendItem(params["ID"])
+	result, err := stock.VendItem(params["ID"])
 	if err != nil {
 		log.Errorf("Unable to vend item %s: %s", params["ID"], err)
 		r.HTML(500, "500", nil)
 		return
 	}
 
-	r.HTML(200, "vend", &vendRenderdata{Item: item})
+	r.HTML(200, "vend", &vendRenderdata{
+		Item:    item,
+		Result:  result,
+		Results: vending.AllResults,
+	})
 }
 
 func webServer(addr, webRoot string, stock *Stock) {

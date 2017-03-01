@@ -1,3 +1,10 @@
 <h1>Vending {{ .Item.Name }}</h1>
 
-<p>(???)
+<p>
+    {{ if eq .Result .Results.ResultSuccess }}
+        Success!
+    {{ else if eq .Result .Results.ResultEmpty }}
+        Can't vend nothing!
+    {{ else }}
+        ????
+    {{ end }}

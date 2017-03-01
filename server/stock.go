@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/joiggama/money"
+	"github.com/lexicality/vending/shared/vending"
 )
 
 var (
@@ -129,17 +130,19 @@ func (stock *Stock) GetItem(ID string) (item *StockItem, err error) {
 }
 
 // VendItem vends an item
-func (stock *Stock) VendItem(ID string) (err error) {
+func (stock *Stock) VendItem(ID string) (result vending.Result, err error) {
 	item, err := stock.GetItem(ID)
 	if err != nil {
-		return err
+		return vending.NoResult, err
 	} else if item == nil {
-		return ErrNotAnItem
+		return vending.NoResult, ErrNotAnItem
 	} else if item.Quantity == 0 || item.Quantity <= item.Reserved {
-		return ErrItemEmpty
+		return vending.ResultEmpty, nil
 	}
 
 	log.Infof("Vending %s which is at %d", item.Name, item.Location)
+
 	// TODO
-	return nil
+
+	return vending.ResultSuccess, nil
 }
