@@ -2,7 +2,8 @@ package main
 
 import (
 	"errors"
-	"fmt"
+
+	"encoding/json"
 
 	"github.com/joiggama/money"
 	"github.com/lexicality/vending/shared/vending"
@@ -159,8 +160,12 @@ func (stock *Stock) VendItem(ID string) (result vending.Result, err error) {
 
 	log.Infof("Vending %s which is at %d", item.Name, item.Location)
 
-	// TODO
-	stock.vendC <- fmt.Sprintf("v%d,", item.Location)
+	req, err := json.Marshal(vending.NewRequest(item.Location))
+	if err != nil {
+		return
+	}
+	stock.vendC <- string(req)
+	// TODO: Verification, reliability, etc
 
 	return vending.ResultSuccess, nil
 }
