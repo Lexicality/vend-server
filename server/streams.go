@@ -1,15 +1,17 @@
 package main
 
-var subs = make([]chan<- string, 0, 10)
-var pub <-chan string
+type PubStream <-chan []byte
 
-func messageSub() <-chan string {
-	newChan := make(chan string, 2)
+var subs = make([]chan<- []byte, 0, 10)
+var pub PubStream
+
+func messageSub() PubStream {
+	newChan := make(chan []byte, 2)
 	subs = append(subs, newChan)
 	return newChan
 }
 
-func messagePub(in <-chan string) {
+func messagePub(in PubStream) {
 	pub = in
 }
 
@@ -19,10 +21,10 @@ func handlePubSub() {
 	}
 
 	for {
-		msg := <-pub
+		msg, ok := <-pub
 
 		// Shut down on message close
-		if msg == "" {
+		if !ok {
 			log.Info("Shutting down pub/sub due to channel closure")
 			for _, c := range subs {
 				close(c)

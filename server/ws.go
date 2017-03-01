@@ -21,12 +21,12 @@ func wsWriteLoop(conn *shared.WSConn) {
 	msgChan := messageSub()
 	pingChang := conn.GetPingTicker()
 
-	var msg string
+	var msg []byte
 	var err error
 	var ok bool
 	for {
 		err = nil
-		msg = ""
+		msg = nil
 		select {
 		case msg, ok = <-msgChan:
 			if !ok {
@@ -39,7 +39,7 @@ func wsWriteLoop(conn *shared.WSConn) {
 			}
 
 			conn.SetWriteDeadline(conn.GetWriteDeadline())
-			err = conn.WriteMessage(websocket.TextMessage, []byte(msg))
+			err = conn.WriteMessage(websocket.TextMessage, msg)
 		case _ = <-pingChang:
 			if conn.IsTimingOut() {
 				log.Info("Killing connection due to ping timeout")
@@ -70,8 +70,8 @@ func wsWriteLoop(conn *shared.WSConn) {
 		}
 
 		// "idk lol"
-		if msg != "" {
-			log.Errorf("Unable to send message %s: %s", msg, err)
+		if msg != nil {
+			log.Errorf("Unable to send message %s: %s", string(msg), err)
 		} else {
 			log.Errorf("Unable to send message: %s", err)
 		}
@@ -92,7 +92,7 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 	var conn = shared.NewWSConn(c)
 	defer c.Close()
 
-	_ = conn.WriteMessage(websocket.TextMessage, []byte("hi!"))
+	_ = conn.WriteMessage(websocket.TextMessage, []byte(`{"type":"Welcome","message":"Hello!"}`))
 
 	// Ignore anything the client has to say
 	go conn.ReadDiscardPump()

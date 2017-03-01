@@ -3,8 +3,6 @@ package main
 import (
 	"errors"
 
-	"encoding/json"
-
 	"github.com/joiggama/money"
 	"github.com/lexicality/vending/shared/vending"
 )
@@ -37,14 +35,14 @@ func (item *StockItem) FormattedPrice() string {
 
 // Stock is an interface to the vending machine (possibly could be named better)
 type Stock struct {
-	VendC <-chan string
+	VendC PubStream
 
 	items map[string]*StockItem
-	vendC chan string
+	vendC chan []byte
 }
 
 func newStock() *Stock {
-	stream := make(chan string)
+	stream := make(chan []byte)
 	return &Stock{
 		items: make(map[string]*StockItem, 14),
 		vendC: stream,
@@ -162,11 +160,11 @@ func (stock *Stock) VendItem(ID string) (result vending.Result, err error) {
 
 	log.Infof("Vending %s which is at %d", item.Name, item.Location)
 
-	req, err := json.Marshal(vending.NewRequest(item.Location))
+	req, err := vending.NewRequestMessage(item.Location)
 	if err != nil {
 		return
 	}
-	stock.vendC <- string(req)
+	stock.vendC <- req
 	// TODO: Verification, reliability, etc
 	result = vending.ResultSuccess
 
