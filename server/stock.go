@@ -151,11 +151,13 @@ func (stock *Stock) GetItem(ID string) (item *StockItem, err error) {
 func (stock *Stock) VendItem(ID string) (result vending.Result, err error) {
 	item, err := stock.GetItem(ID)
 	if err != nil {
-		return vending.NoResult, err
+		return
 	} else if item == nil {
-		return vending.NoResult, ErrNotAnItem
+		err = ErrNotAnItem
+		return
 	} else if item.Quantity == 0 || item.Quantity <= item.Reserved {
-		return vending.ResultEmpty, nil
+		result = vending.ResultEmpty
+		return
 	}
 
 	log.Infof("Vending %s which is at %d", item.Name, item.Location)
@@ -166,6 +168,7 @@ func (stock *Stock) VendItem(ID string) (result vending.Result, err error) {
 	}
 	stock.vendC <- string(req)
 	// TODO: Verification, reliability, etc
+	result = vending.ResultSuccess
 
-	return vending.ResultSuccess, nil
+	return
 }
