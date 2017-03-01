@@ -61,60 +61,70 @@ func GetFakeStock() *Stock {
 		Quantity: 5,
 		Image:    "",
 		Price:    1000,
+		Location: 0,
 	}
 	stock.items["67fd2453-a2a9-4260-949d-c0f573b4b3ab"] = &StockItem{
 		ID:       "67fd2453-a2a9-4260-949d-c0f573b4b3ab",
 		Name:     "Example Item #2",
 		Quantity: 50,
 		Price:    333,
+		Location: 1,
 	}
 	stock.items["47db0c90-e9ff-4b2f-a646-ef259887a89b"] = &StockItem{
 		ID:       "47db0c90-e9ff-4b2f-a646-ef259887a89b",
 		Name:     "Example Item #3",
 		Quantity: 200,
 		Price:    11133,
+		Location: 2,
 	}
 	stock.items["aaac9bd8-ac3f-4348-af1c-c211396e3ff9"] = &StockItem{
 		ID:       "aaac9bd8-ac3f-4348-af1c-c211396e3ff9",
 		Name:     "Example Item #4",
 		Quantity: 5,
 		Price:    50,
+		Location: 3,
 	}
 	stock.items["552be5d3-ed40-4a2e-bb88-f0319b5f4af1"] = &StockItem{
 		ID:       "552be5d3-ed40-4a2e-bb88-f0319b5f4af1",
 		Name:     "Example Item #5",
 		Quantity: 5,
 		Price:    100,
+		Location: 4,
 	}
 	stock.items["ef8e1fc5-8a5d-49fb-baba-37377beead4a"] = &StockItem{
 		ID:       "ef8e1fc5-8a5d-49fb-baba-37377beead4a",
 		Name:     "Example Item #6",
 		Quantity: 5,
 		Price:    1200,
+		Location: 5,
 	}
 	stock.items["0840a34d-e024-4e47-a8db-471ac97c6aae"] = &StockItem{
 		ID:       "0840a34d-e024-4e47-a8db-471ac97c6aae",
 		Name:     "Example Item #7",
 		Quantity: 5,
 		Price:    123456,
+		Location: 6,
 	}
 	stock.items["193599ed-d1eb-411c-9ecc-e2343256609b"] = &StockItem{
 		ID:       "193599ed-d1eb-411c-9ecc-e2343256609b",
 		Name:     "Example Item #8",
 		Quantity: 5,
 		Price:    0,
+		Location: 7,
 	}
 	stock.items["c0e26c01-8f37-4a23-a7e9-caf322036ba9"] = &StockItem{
 		ID:       "c0e26c01-8f37-4a23-a7e9-caf322036ba9",
 		Name:     "Example Item #9",
 		Quantity: 5,
 		Price:    -100,
+		Location: 8,
 	}
 	stock.items["b4d6ec03-268c-49d6-ac17-c107b3375014"] = &StockItem{
 		ID:       "b4d6ec03-268c-49d6-ac17-c107b3375014",
 		Name:     "Example Item #10",
 		Quantity: 0,
 		Price:    1000,
+		Location: 9,
 	}
 	return stock
 }
