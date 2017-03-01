@@ -17,8 +17,9 @@ func main() {
 	fmt.Println("Hello World")
 
 	stock := GetFakeStock()
+	// stdinStream := readStreamer()
 
-	messagePub(readStreamer())
+	messagePub(stock.VendC)
 	go handlePubSub()
 	go tcpServer(":8081")
 	webServer(":8080", webRoot, stock)
