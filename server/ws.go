@@ -25,6 +25,7 @@ func wsReadLoop(conn *shared.WSConn) {
 		err = conn.ReadJSON(msg)
 		if websocket.IsCloseError(err, websocket.CloseGoingAway, websocket.CloseNormalClosure) {
 			log.Debug("Ending read loop due to socket closing")
+			return
 		} else if err != nil {
 			log.Infof("Closing connection due to read error: %s", err)
 			conn.Close()
