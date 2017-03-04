@@ -1,57 +1,221 @@
-<script language="javascript" type="text/javascript">
-	var wsUri = "ws://localhost:8080/ws/";
-	var output, websocket;
-
-	function init() {
-		console.log("Hello world!");
-		output = document.getElementById("output");
-		testWebSocket();
+<style type="text/css">
+	* {
+		flex: 0 0 auto;
 	}
 
-	function testWebSocket() {
-		console.log("Connecting!")
+	body,
+	html,
+	#site {
+		height: 100%;
+	}
+
+	h1, h2 {
+		margin-top: 0;
+	}
+
+	ol {
+		list-style: none;
+		padding-left: 3.6em;
+		font-family: Consalas, "Courier New", Courier, monospace;
+		overflow: auto;
+		margin: 0;
+
+		flex: 1 1 auto;
+	}
+
+	li {
+		position: relative;
+		border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+		margin: 1em 0;
+		padding-bottom: 1em;
+	}
+
+	li:first-child {
+		border-top: 1px solid rgba(0, 0, 0, 0.4);
+		padding-top: 1em;
+	}
+
+	.type {
+		position: absolute;
+		top: 0;
+		left: -3.6em;
+	}
+
+	.sent .tag {
+		color: darkorange;
+	}
+
+	.recv .tag {
+		color: teal;
+	}
+
+	.ctrl .tag {
+		color: aqua;
+	}
+
+	.err .tag {
+		color: red;
+		font-weight: bold;
+	}
+
+	.json {
+		white-space: pre-wrap;
+	}
+
+	label {
+		display: block;
+	}
+
+	#site {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.formsets {
+		display: flex;
+		justify-content: space-around;
+	}
+
+	.formsep {
+		flex: 0 0 auto;
+		padding: 0 20px;
+	}
+
+	.formsep>* {
+		width: 100%;
+	}
+
+	textarea {
+		resize: vertical;
+	}
+
+	#errors {
+		color: red;
+	}
+</style>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<h1>Vending Machine</h1>
+<h2>Send message</h2>
+<form id="sending">
+	<div class="formsets">
+		<div class="formsep" style="flex:1 0 auto">
+			<label for="send-type">Message Type</label>
+			<input type="text" id="send-type" placeholder="Response"></input>
+		</div>
+		<div class="formsep" style="flex:4 0 auto">
+			<label for="send-message">JSON</label>
+			<textarea id="send-message" rows=5></textarea>
+		</div>
+	</div>
+	<p id="errors"></p>
+	<div style="text-align: right">
+		<button type="submit" style="padding: 2px 2em">Send</button>
+	</div>
+</form>
+<h2>Websockets Output</h2>
+<ol id="messages"></ol>
+
+<script language="javascript" type="text/javascript">
+	"use strict";
+	var wsUri = "ws://localhost:8080/ws/";
+
+	var output = $('#messages');
+	var websocket;
+
+	function jsonMsg(type, tag, msg) {
+		const msgtxt = JSON.stringify(msg, void 0, "\t")
+
+		output.prepend(
+			$('<li>', { class: type }).prepend(
+				$('<span>', { class: "type", text: type }),
+				$('<span>', { class: "tag", text: tag }),
+				$('<pre>', { class: "json", text: msgtxt })
+			)
+		);
+	}
+
+	function ctrlMsg(tag) {
+		output.prepend(
+			$('<li>', { class: 'ctrl' }).append(
+				$('<span>', { class: "tag", text: tag })
+			)
+		);
+	}
+
+	function errMsg(err) {
+		output.prepend(
+			$('<li>', { class: 'err' }).append(
+				$('<span>', { class: "tag", text: "ERROR" }),
+				$('<p>', { class: "msg", text: err })
+			)
+		);
+	}
+
+	function init() {
+		console.log("Connecting!");
 		websocket = new WebSocket(wsUri);
 		websocket.onopen = onOpen;
 		websocket.onclose = onClose;
 		websocket.onmessage = onMessage;
 		websocket.onerror = onError;
-		console.log("Really attempting to connect srrrs")
+		console.log("Really attempting to connect srrrs");
 	}
 
 	function onOpen(evt) {
-		writeToScreen("CONNECTED");
+		ctrlMsg("Connected");
 		doSend("WebSocket rocks");
 	}
 
 	function onClose(evt) {
-		writeToScreen("DISCONNECTED");
+		ctrlMsg("Disconnected");
 	}
 
 	function onMessage(evt) {
-		writeToScreen('<span style="color: blue;">RESPONSE: ' + evt.data + '</span>');
+		const data = JSON.parse(evt.data);
+		jsonMsg('recv', data.type, data.message)
 	}
 
 	function onError(evt) {
-		writeToScreen('<span style="color: red;">ERROR:</span> ' + evt.data);
+		errMsg(evt.data)
 	}
 
 	function doSend(message) {
-		writeToScreen("SENT: " + message);
+		jsonMsg("sent", "garbage", message)
 		websocket.send(message);
 	}
 
-	function writeToScreen(message) {
-		console.info(message)
-		var pre = document.createElement("p");
-		pre.style.wordWrap = "break-word";
-		pre.innerHTML = message;
-		output.appendChild(pre);
+	function sendJSON(type, message) {
+		jsonMsg("sent", type, message);
+		websocket.send(JSON.stringify({ type, message }));
 	}
 
-	window.addEventListener("load", init, false);
+	$('#sending').on('submit', (evt) => {
+		evt.preventDefault();
+		$('#errors').text();
+
+		const type = $('#send-type').val();
+		const rawMsg = $('#send-message').val();
+
+		let msg;
+		try {
+			msg = JSON.parse(rawMsg);
+		} catch (e) {
+			$('#errors').text("Invalid JSON: " + e.message);
+			return;
+		}
+
+		sendJSON(type, msg);
+	});
+
+	window.onerror = (errmsg, fname, line, col, err) => {
+		console.error(err || errmsg);
+		try {
+			errMsg("JS ERROR: " + errmsg);
+		} catch (e) {
+			console.error(":(", e);
+		}
+	};
+
+	init();
 
 </script>
-
-<h2>WebSocket Test</h2>
-
-<div id="output"></div>
