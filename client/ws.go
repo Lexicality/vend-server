@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"net/http"
 
 	"github.com/gorilla/websocket"
 	"github.com/lexicality/vending/shared"
@@ -50,11 +51,16 @@ func readPump(conn *shared.WSConn) error {
 	}
 }
 
+var wsDialer = websocket.Dialer{
+	Proxy:        http.ProxyFromEnvironment,
+	Subprotocols: []string{vending.MessageProtocol},
+}
+
 func wsHandler(server string) {
 	log.Notice("Connection attempt begining")
 	var err error
 
-	c, _, err := websocket.DefaultDialer.Dial(server, nil)
+	c, _, err := wsDialer.Dial(server, nil)
 	if err != nil {
 		log.Errorf("Unable to connect to server: %s", err)
 		return

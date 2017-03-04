@@ -13,6 +13,7 @@ import (
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
+	Subprotocols:    []string{vending.MessageProtocol},
 	// Disable security until I sort out the client
 	CheckOrigin: func(r *http.Request) bool { return true },
 }
@@ -82,6 +83,14 @@ func wsWriteLoop(conn *shared.WSConn) {
 func wsHandler(w http.ResponseWriter, r *http.Request) {
 	log.Notice("Connection attempt begining")
 	var err error
+
+	subProtocols := websocket.Subprotocols(r)
+	if len(subProtocols) != 1 || subProtocols[0] != vending.MessageProtocol {
+		log.Noticef("Connection attempt with wrong protocol - expected [%s] but got %v", vending.MessageProtocol, subProtocols)
+		w.WriteHeader(400)
+		w.Write([]byte("Bad protocol"))
+		return
+	}
 
 	c, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {

@@ -6,6 +6,9 @@ import (
 	"github.com/satori/go.uuid"
 )
 
+// MessageProtocol is the Websocket protocol that describes using these Message structs to communicate
+const MessageProtocol = "vend-json"
+
 // SendMessage reperesents a Message being sent
 // Message is an arbitrary JSON object, while Type describes how to handle it
 type SendMessage struct {
