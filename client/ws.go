@@ -9,18 +9,14 @@ import (
 	"github.com/lexicality/vending/shared/vending"
 )
 
-func handleMessage(message []byte) error {
-	msg := vending.RecvMessage{}
-	err := json.Unmarshal(message, &msg)
-	if err != nil {
-		return err
-	} else if msg.Type != "Request" {
+func handleMessage(msg *vending.RecvMessage) error {
+	if msg.Type != "Request" {
 		log.Warningf("Unahandled message %s with type %s!", msg.Message, msg.Type)
 		return nil
 	}
 
 	req := vending.Request{}
-	err = json.Unmarshal(msg.Message, &req)
+	err := json.Unmarshal(msg.Message, &req)
 	if err != nil {
 		return err
 	}
@@ -31,17 +27,16 @@ func handleMessage(message []byte) error {
 }
 
 func readPump(conn *shared.WSConn) error {
+	var err error
+	// Reuse the same message object
+	var msg = &vending.RecvMessage{}
 	for {
-		mType, msg, err := conn.ReadMessage()
+		err = conn.ReadJSON(msg)
 		if err != nil {
 			return err
-		} else if mType != websocket.TextMessage {
-			log.Warningf("Got unknown message type %+v with message %s", mType, msg)
-			continue
 		}
-
 		conn.MessageRecieved()
-		log.Debugf("MESSAGE: %s", msg)
+		log.Debugf("Recieved %s message: %s", msg.Type, msg.Message)
 
 		err = handleMessage(msg)
 		if err != nil {
