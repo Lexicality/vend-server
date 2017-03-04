@@ -93,7 +93,15 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 	var conn = shared.NewWSConn(c)
 	defer c.Close()
 
-	_ = conn.WriteMessage(websocket.TextMessage, []byte(`{"type":"Welcome","message":"Hello!"}`))
+	// Make sure the socket is open
+	err = conn.WriteJSON(&vending.SendMessage{
+		Type:    "Welcome",
+		Message: "Hello!",
+	})
+	if err != nil {
+		log.Warningf("Unable to send welcome message: %s", err)
+		return
+	}
 
 	// Ignore anything the client has to say
 	go conn.ReadDiscardPump()

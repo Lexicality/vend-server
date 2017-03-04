@@ -62,7 +62,10 @@ func wsHandler(server string) {
 	var conn = shared.NewWSConn(c)
 	defer conn.Close()
 
-	err = conn.WriteMessage(websocket.TextMessage, []byte("hi!"))
+	err = conn.WriteJSON(&vending.SendMessage{
+		Type:    "Welcome",
+		Message: "Hello!",
+	})
 	if err != nil {
 		log.Fatalf("It's not actually open :(")
 	}
