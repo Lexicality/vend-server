@@ -163,7 +163,7 @@
 
 	function onOpen(evt) {
 		ctrlMsg("Connected");
-		doSend("WebSocket rocks");
+		sendJSON("Welcome", "Hello from HTML!")
 	}
 
 	function onClose(evt) {
