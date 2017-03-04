@@ -31,6 +31,12 @@ type Request struct {
 	ID uuid.UUID `json:"id"`
 }
 
+// Response is a reply from the vending machine
+type Response struct {
+	Result Result    `json:"result"`
+	ID     uuid.UUID `json:"id"`
+}
+
 // NewMessageID returns a unique identifier
 func NewMessageID() uuid.UUID {
 	return uuid.NewV4()

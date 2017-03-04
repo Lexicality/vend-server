@@ -9,7 +9,7 @@ import (
 	"github.com/lexicality/vending/shared/vending"
 )
 
-func handleMessage(msg *vending.RecvMessage) error {
+func handleMessage(conn *shared.WSConn, msg *vending.RecvMessage) error {
 	if msg.Type != "Request" {
 		log.Warningf("Unahandled message %s with type %s!", msg.Message, msg.Type)
 		return nil
@@ -21,7 +21,16 @@ func handleMessage(msg *vending.RecvMessage) error {
 		return err
 	}
 
+	// TODO: Actually know if it's vended!
 	vendItem(req.Location)
+
+	conn.WriteJSON(&vending.SendMessage{
+		Type: "Response",
+		Message: &vending.Response{
+			ID:     req.ID,
+			Result: vending.ResultSuccess,
+		},
+	})
 
 	return nil
 }
@@ -38,7 +47,7 @@ func readPump(conn *shared.WSConn) error {
 		conn.MessageRecieved()
 		log.Debugf("Recieved %s message: %s", msg.Type, msg.Message)
 
-		err = handleMessage(msg)
+		err = handleMessage(conn, msg)
 		if err != nil {
 			log.Warningf("Unable to handle message %s: %s", msg, err)
 			continue
