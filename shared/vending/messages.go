@@ -6,8 +6,16 @@ import (
 	"github.com/satori/go.uuid"
 )
 
-// Message is a generic message that explains what it is
-type Message struct {
+// SendMessage reperesents a Message being sent
+// Message is an arbitrary JSON object, while Type describes how to handle it
+type SendMessage struct {
+	Type    string      `json:"type"`
+	Message interface{} `json:"message"`
+}
+
+// RecvMessage represents a Message being recieved
+// Type describes how to decode the JSON stored in Message
+type RecvMessage struct {
 	Type    string          `json:"type"`
 	Message json.RawMessage `json:"message"`
 }
@@ -20,18 +28,12 @@ type Request struct {
 	ID uuid.UUID `json:"id"`
 }
 
-// NewRequestMessage creates a JSON encoded request with a random UUID
-func NewRequestMessage(location uint8) ([]byte, error) {
-	req, err := json.Marshal(&Request{
-		Location: location,
-		ID:       uuid.NewV4(),
-	})
-	if err != nil {
-		return nil, err
-	}
+// NewMessageID returns a unique identifier
+func NewMessageID() uuid.UUID {
+	return uuid.NewV4()
+}
 
-	return json.Marshal(&Message{
-		Type:    "Request",
-		Message: req,
-	})
+// CompareMessageIDs checks if two message IDs are equal
+func CompareMessageIDs(one, two uuid.UUID) bool {
+	return uuid.Equal(one, two)
 }

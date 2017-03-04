@@ -7,6 +7,7 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/lexicality/vending/shared"
+	"github.com/lexicality/vending/shared/vending"
 )
 
 var upgrader = websocket.Upgrader{
@@ -21,7 +22,7 @@ func wsWriteLoop(conn *shared.WSConn) {
 	msgChan := messageSub()
 	pingChang := conn.GetPingTicker()
 
-	var msg []byte
+	var msg *vending.SendMessage
 	var err error
 	var ok bool
 	for {
@@ -39,7 +40,7 @@ func wsWriteLoop(conn *shared.WSConn) {
 			}
 
 			conn.SetWriteDeadline(conn.GetWriteDeadline())
-			err = conn.WriteMessage(websocket.TextMessage, msg)
+			err = conn.WriteJSON(msg)
 		case _ = <-pingChang:
 			if conn.IsTimingOut() {
 				log.Info("Killing connection due to ping timeout")
@@ -71,7 +72,7 @@ func wsWriteLoop(conn *shared.WSConn) {
 
 		// "idk lol"
 		if msg != nil {
-			log.Errorf("Unable to send message %s: %s", string(msg), err)
+			log.Errorf("Unable to send message %+v: %s", msg, err)
 		} else {
 			log.Errorf("Unable to send message: %s", err)
 		}

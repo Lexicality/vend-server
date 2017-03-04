@@ -38,11 +38,11 @@ type Stock struct {
 	VendC PubStream
 
 	items map[string]*StockItem
-	vendC chan []byte
+	vendC chan *vending.SendMessage
 }
 
 func newStock() *Stock {
-	stream := make(chan []byte)
+	stream := make(chan *vending.SendMessage)
 	return &Stock{
 		items: make(map[string]*StockItem, 14),
 		vendC: stream,
@@ -160,11 +160,17 @@ func (stock *Stock) VendItem(ID string) (result vending.Result, err error) {
 
 	log.Infof("Vending %s which is at %d", item.Name, item.Location)
 
-	req, err := vending.NewRequestMessage(item.Location)
-	if err != nil {
-		return
+	req := &vending.Request{
+		Location: item.Location,
+		ID:       vending.NewMessageID(),
 	}
-	stock.vendC <- req
+	msg := &vending.SendMessage{
+		Type:    "Request",
+		Message: req,
+	}
+
+	stock.vendC <- msg
+
 	// TODO: Verification, reliability, etc
 	result = vending.ResultSuccess
 

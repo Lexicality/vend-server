@@ -9,7 +9,7 @@ import (
 )
 
 func handleMessage(message []byte) error {
-	msg := vending.Message{}
+	msg := vending.RecvMessage{}
 	err := json.Unmarshal(message, &msg)
 	if err != nil {
 		return err

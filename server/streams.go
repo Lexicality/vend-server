@@ -1,12 +1,17 @@
 package main
 
-type PubStream <-chan []byte
+import (
+	"github.com/lexicality/vending/shared/vending"
+)
 
-var subs = make([]chan<- []byte, 0, 10)
+// PubStream is a published stream of vending messages
+type PubStream <-chan *vending.SendMessage
+
+var subs = make([]chan<- *vending.SendMessage, 0, 10)
 var pub PubStream
 
 func messageSub() PubStream {
-	newChan := make(chan []byte, 2)
+	newChan := make(chan *vending.SendMessage, 2)
 	subs = append(subs, newChan)
 	return newChan
 }
