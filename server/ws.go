@@ -18,6 +18,26 @@ var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool { return true },
 }
 
+func wsReadLoop(conn *shared.WSConn) {
+	var err error
+	var msg = &vending.RecvMessage{}
+	for {
+		err = conn.ReadJSON(msg)
+		if websocket.IsCloseError(err, websocket.CloseGoingAway, websocket.CloseNormalClosure) {
+			log.Debug("Ending read loop due to socket closing")
+		} else if err != nil {
+			log.Infof("Closing connection due to read error: %s", err)
+			conn.Close()
+			return
+		}
+
+		conn.MessageRecieved()
+		log.Debugf("Recieved %s message: %s", msg.Type, msg.Message)
+
+		// TODO
+	}
+}
+
 func wsWriteLoop(conn *shared.WSConn) {
 
 	msgChan := messageSub()
@@ -113,7 +133,7 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Ignore anything the client has to say
-	go conn.ReadDiscardPump()
+	go wsReadLoop(conn)
 	// Tell them all the important things we have to say
 	wsWriteLoop(conn)
 }
