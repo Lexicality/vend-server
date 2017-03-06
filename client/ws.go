@@ -10,36 +10,37 @@ import (
 	"github.com/lexicality/vending/shared/vending"
 )
 
-func handleMessage(conn *shared.WSConn, hw vendio.Hardware, msg *vending.RecvMessage) error {
-	if msg.Type != "Request" {
+func handleMessage(hw vendio.Hardware, msg *vending.RecvMessage) (resp *vending.SendMessage, err error) {
+	switch msg.Type {
+	case "Request":
+		req := vending.Request{}
+		err = json.Unmarshal(msg.Message, &req)
+		if err != nil {
+			return nil, err
+		}
+
+		log.Infof("Vending location %d for request %s", req.Location, req.ID)
+
+		res := vendItem(hw, req.Location)
+
+		return &vending.SendMessage{
+			Type: "Response",
+			Message: &vending.Response{
+				ID:     req.ID,
+				Result: res,
+			},
+		}, nil
+	default:
 		log.Warningf("Unahandled message %s with type %s!", msg.Message, msg.Type)
-		return nil
+		return nil, nil
 	}
-
-	req := vending.Request{}
-	err := json.Unmarshal(msg.Message, &req)
-	if err != nil {
-		return err
-	}
-
-	// TODO: Actually know if it's vended!
-	hw.Vend(req.Location)
-
-	conn.WriteJSON(&vending.SendMessage{
-		Type: "Response",
-		Message: &vending.Response{
-			ID:     req.ID,
-			Result: vending.ResultSuccess,
-		},
-	})
-
-	return nil
 }
 
 func readPump(conn *shared.WSConn, hw vendio.Hardware) error {
 	var err error
 	// Reuse the same message object
 	var msg = &vending.RecvMessage{}
+	var resp *vending.SendMessage
 	for {
 		err = conn.ReadJSON(msg)
 		if err != nil {
@@ -48,10 +49,15 @@ func readPump(conn *shared.WSConn, hw vendio.Hardware) error {
 		conn.MessageRecieved()
 		log.Debugf("Recieved %s message: %s", msg.Type, msg.Message)
 
-		err = handleMessage(conn, hw, msg)
+		resp, err = handleMessage(hw, msg)
 		if err != nil {
-			log.Warningf("Unable to handle message %s: %s", msg, err)
+			log.Errorf("Unable to handle message %s: %s", msg, err)
 			continue
+		} else if resp != nil {
+			err = conn.WriteJSON(resp)
+			if err != nil {
+				return err
+			}
 		}
 	}
 }
