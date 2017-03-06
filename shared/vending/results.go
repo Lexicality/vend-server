@@ -14,6 +14,8 @@ const (
 	ResultBusy
 	// ResultOffline is when the vending machine isn't talking to us right now
 	ResultOffline
+	// ResultJammed is when the vending machine physically can't vend
+	ResultJammed
 	// ResultHardwareFailure is when the vending machine is on fire
 	ResultHardwareFailure
 	// ResultUnknownFailure is when something else went wrong
