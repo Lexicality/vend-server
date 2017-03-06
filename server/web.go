@@ -85,8 +85,7 @@ func webServer(addr, webRoot string, stock *Stock) {
 	m.Get("/", renderHome)
 	m.Get("/items/:ID", renderItem)
 	m.Get("/items/:ID/vend", renderVendItem)
-	m.Get("/ws", wsHandler)
 	m.NotFound(render404)
 
-	m.RunOnAddr(":8080")
+	m.RunOnAddr(addr)
 }

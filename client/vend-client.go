@@ -12,5 +12,5 @@ func main() {
 	hardware := vendio.GetHardware(log)
 	hardware.Setup()
 	defer hardware.Teardown()
-	wsHandler("ws://localhost:8080/ws", hardware)
+	wsHandler("ws://localhost:8080/", hardware)
 }

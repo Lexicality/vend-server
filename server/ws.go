@@ -105,6 +105,13 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 	log.Notice("Connection attempt begining")
 	var err error
 
+	if r.RequestURI != "/" {
+		log.Noticef("Connection attempt to subpath '%s'?", r.RequestURI)
+		w.WriteHeader(400)
+		w.Write([]byte("Bad path"))
+		return
+	}
+
 	subProtocols := websocket.Subprotocols(r)
 	if len(subProtocols) != 1 || subProtocols[0] != vending.MessageProtocol {
 		log.Noticef("Connection attempt with wrong protocol - expected [%s] but got %v", vending.MessageProtocol, subProtocols)
@@ -120,6 +127,7 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
+
 	var conn = shared.NewWSConn(c)
 	defer c.Close()
 
@@ -137,4 +145,13 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 	go wsReadLoop(conn)
 	// Tell them all the important things we have to say
 	wsWriteLoop(conn)
+}
+
+func wsServer(addr string) {
+	server := &http.Server{
+		Addr:    addr,
+		Handler: http.HandlerFunc(wsHandler),
+	}
+
+	server.ListenAndServe()
 }

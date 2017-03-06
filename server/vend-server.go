@@ -21,5 +21,6 @@ func main() {
 
 	messagePub(stock.VendC)
 	go handlePubSub()
-	webServer(":8080", webRoot, stock)
+	go wsServer(":8080")
+	webServer(":80", webRoot, stock)
 }
