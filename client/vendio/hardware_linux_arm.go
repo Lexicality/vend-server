@@ -1,6 +1,7 @@
-package main
+package vendio
 
 import (
+	logging "github.com/op/go-logging"
 	"github.com/stianeikeland/go-rpio"
 )
 
@@ -12,12 +13,18 @@ const (
 	pinOE     rpio.Pin = 1  // 28
 )
 
-func readyHardware() (err error) {
+type hardware struct {
+	log *logging.Logger
+}
 
-	log.Info("Hello I'm ARM!")
-	err = rpio.Open()
+func (hw *hardware) Setup() error {
+	if hw.log != nil {
+		hw.log.Info("Hello I'm ARM!")
+	}
+
+	err := rpio.Open()
 	if err != nil {
-		return
+		return err
 	}
 	pinStrobe.Output()
 	pinData.Output()
@@ -30,12 +37,16 @@ func readyHardware() (err error) {
 	return rpio.Open()
 }
 
-func closeHardware() error {
+func (hw *hardware) Teardown() error {
 	return rpio.Close()
 }
 
-func vendItem(location uint8) {
+func (hw *hardware) Vend(location uint8) error {
+	if hw.log != nil {
+		hw.log.Infof("==== I AM VENDING ITEM #%d! ====", location)
+	}
 	setMotor(location)
+	return nil
 }
 
 // COPIED WHOLESALE FROM MOTORTEST - DOES IT WORK? WHO KNOWSSSS

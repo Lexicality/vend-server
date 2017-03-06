@@ -5,11 +5,12 @@ import (
 	"net/http"
 
 	"github.com/gorilla/websocket"
+	"github.com/lexicality/vending/client/vendio"
 	"github.com/lexicality/vending/shared"
 	"github.com/lexicality/vending/shared/vending"
 )
 
-func handleMessage(conn *shared.WSConn, msg *vending.RecvMessage) error {
+func handleMessage(conn *shared.WSConn, hw vendio.Hardware, msg *vending.RecvMessage) error {
 	if msg.Type != "Request" {
 		log.Warningf("Unahandled message %s with type %s!", msg.Message, msg.Type)
 		return nil
@@ -22,7 +23,7 @@ func handleMessage(conn *shared.WSConn, msg *vending.RecvMessage) error {
 	}
 
 	// TODO: Actually know if it's vended!
-	vendItem(req.Location)
+	hw.Vend(req.Location)
 
 	conn.WriteJSON(&vending.SendMessage{
 		Type: "Response",
@@ -35,7 +36,7 @@ func handleMessage(conn *shared.WSConn, msg *vending.RecvMessage) error {
 	return nil
 }
 
-func readPump(conn *shared.WSConn) error {
+func readPump(conn *shared.WSConn, hw vendio.Hardware) error {
 	var err error
 	// Reuse the same message object
 	var msg = &vending.RecvMessage{}
@@ -47,7 +48,7 @@ func readPump(conn *shared.WSConn) error {
 		conn.MessageRecieved()
 		log.Debugf("Recieved %s message: %s", msg.Type, msg.Message)
 
-		err = handleMessage(conn, msg)
+		err = handleMessage(conn, hw, msg)
 		if err != nil {
 			log.Warningf("Unable to handle message %s: %s", msg, err)
 			continue
@@ -60,7 +61,7 @@ var wsDialer = websocket.Dialer{
 	Subprotocols: []string{vending.MessageProtocol},
 }
 
-func wsHandler(server string) {
+func wsHandler(server string, hw vendio.Hardware) {
 	log.Notice("Connection attempt begining")
 	var err error
 
@@ -80,7 +81,7 @@ func wsHandler(server string) {
 		log.Fatalf("It's not actually open :(")
 	}
 
-	err = readPump(conn)
+	err = readPump(conn, hw)
 	if err != nil {
 		log.Errorf("Connection died: %s", err)
 	} else {
