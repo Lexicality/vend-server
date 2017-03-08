@@ -96,13 +96,13 @@ func (hw *hardware) getMotorMode() MotorMode {
 	}
 }
 
-func (hw *hardware) Vend(location uint8) error {
+func (hw *hardware) Vend(location uint8) vending.Result {
 	if hw.log != nil {
 		hw.log.Infof("~~~I AM VENDING ITEM #%d!", location)
 	}
 
 	if location > vending.MaxLocations {
-		return ErrInvalidLocation
+		return vending.ResultInvalidRequest
 	}
 
 	// Dump debugging info before starting
@@ -129,15 +129,15 @@ func (hw *hardware) Vend(location uint8) error {
 	for {
 		select {
 		case <-endTimer.C:
-			return nil
+			return vending.ResultSuccess
 		case <-t:
 		case <-checkTicker.C:
 			motorState := hw.getMotorMode()
 			if motorState == MotorJammed {
-				return ErrMachineJammed
+				return vending.ResultJammed
 			} else if motorState == MotorEmpty {
 				// TODO: If it shows up as empty after 29 seconds of not being empty it's probably a successful vend
-				return ErrLocationEmpty
+				return vending.ResultEmpty
 			}
 		}
 	}

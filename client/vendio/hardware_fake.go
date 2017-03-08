@@ -3,6 +3,7 @@
 package vendio
 
 import (
+	"github.com/lexicality/vending/shared/vending"
 	"github.com/op/go-logging"
 )
 
@@ -21,9 +22,9 @@ func (hw *hardware) Teardown() error {
 	return nil
 }
 
-func (hw *hardware) Vend(location uint8) error {
+func (hw *hardware) Vend(location uint8) vending.Result {
 	if hw.log != nil {
 		hw.log.Infof("==== I AM VENDING ITEM #%d! ====", location)
 	}
-	return nil
+	return vending.ResultSuccess
 }

@@ -21,7 +21,7 @@ func handleMessage(hw vendio.Hardware, msg *vending.RecvMessage) (resp *vending.
 
 		log.Infof("Vending location %d for request %s", req.Location, req.ID)
 
-		res := vendItem(hw, req.Location)
+		res := hw.Vend(req.Location)
 
 		return &vending.SendMessage{
 			Type: "Response",

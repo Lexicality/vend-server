@@ -20,6 +20,8 @@ const (
 	ResultHardwareFailure
 	// ResultUnknownFailure is when something else went wrong
 	ResultUnknownFailure
+	// ResultInvalidRequest is when you do something stupid
+	ResultInvalidRequest
 )
 
 // AllResults is a handy array of all results such as you might want in a template
@@ -27,6 +29,9 @@ var AllResults = map[string]Result{
 	"ResultSuccess":         ResultSuccess,
 	"ResultEmpty":           ResultEmpty,
 	"ResultBusy":            ResultBusy,
+	"ResultOffline":         ResultOffline,
+	"ResultJammed":          ResultJammed,
 	"ResultHardwareFailure": ResultHardwareFailure,
 	"ResultUnknownFailure":  ResultUnknownFailure,
+	"ResultInvalidRequest":  ResultInvalidRequest,
 }
