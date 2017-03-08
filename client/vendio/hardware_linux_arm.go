@@ -106,8 +106,11 @@ func (hw *hardware) Vend(location uint8) vending.Result {
 	}
 
 	// Dump debugging info before starting
-	hw.getMotorMode()
+	_ := hw.getMotorMode()
 
+	// TODO: If the motor state is MotorOn, something has gone very wrong
+
+	// TODO: This should not be necessary
 	for _, pin := range outPins {
 		pin.Low()
 	}
@@ -139,6 +142,7 @@ func (hw *hardware) Vend(location uint8) vending.Result {
 				// TODO: If it shows up as empty after 29 seconds of not being empty it's probably a successful vend
 				return vending.ResultEmpty
 			}
+			// TODO: If the motor state doesn't change to MotorOn then there's a hardware failure somewhere
 		}
 	}
 }
