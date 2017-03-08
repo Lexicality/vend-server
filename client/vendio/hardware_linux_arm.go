@@ -105,7 +105,8 @@ func (hw *hardware) Vend(location uint8) error {
 		return ErrInvalidLocation
 	}
 
-	hw.log.Debugf("INPUT HIGH BIT: %")
+	// Dump debugging info before starting
+	hw.getMotorMode()
 
 	for _, pin := range outPins {
 		pin.Low()
