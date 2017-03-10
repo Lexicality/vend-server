@@ -3,6 +3,8 @@
 package hardware
 
 import (
+	"context"
+
 	"github.com/lexicality/vending/vend"
 	"github.com/op/go-logging"
 )
@@ -22,7 +24,7 @@ func (hw *hardware) Teardown() error {
 	return nil
 }
 
-func (hw *hardware) Vend(location uint8) vend.Result {
+func (hw *hardware) Vend(ctx context.Context, location uint8) vend.Result {
 	if hw.log != nil {
 		hw.log.Infof("=== I AM VENDING ITEM #%d! ===", location)
 	}

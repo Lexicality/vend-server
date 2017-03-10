@@ -3,13 +3,15 @@ package hardware
 import (
 	"time"
 
+	"context"
+
 	"github.com/lexicality/vending/vend"
 	"github.com/op/go-logging"
 	rpio "github.com/stianeikeland/go-rpio"
 )
 
 // Bottom 16 pins starting at physical pin 21
-var outPins = [vending.MaxLocations]rpio.Pin{
+var outPins = [vend.MaxLocations]rpio.Pin{
 	9, 25, 11, 8,
 	7, 0, 1, 5,
 	6, 12, 13, 19,
@@ -96,17 +98,20 @@ func (hw *hardware) getMotorMode() MotorMode {
 	}
 }
 
-func (hw *hardware) Vend(location uint8) vend.Result {
+func (hw *hardware) Vend(ctx context.Context, location uint8) vend.Result {
 	if hw.log != nil {
 		hw.log.Infof("~~~I AM VENDING ITEM #%d!", location)
 	}
 
 	if location > vend.MaxLocations {
 		return vend.ResultInvalidRequest
+	} else if dl, ok := ctx.Deadline(); ok && dl.Before(time.Now().Add(VendTime)) {
+		// Don't even try and do anything if we're going to be aborted before we can vend
+		return vend.ResultAborted
 	}
 
 	// Dump debugging info before starting
-	_ := hw.getMotorMode()
+	_ = hw.getMotorMode()
 
 	// TODO: If the motor state is MotorOn, something has gone very wrong
 
@@ -131,6 +136,7 @@ func (hw *hardware) Vend(location uint8) vend.Result {
 	t <- true
 	for {
 		select {
+		// We do *NOT* listen to context cancelations to avoid partial vends
 		case <-endTimer.C:
 			return vend.ResultSuccess
 		case <-t:

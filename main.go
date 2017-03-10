@@ -1,7 +1,11 @@
 package main
 
 import (
-	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
+
+	"context"
 
 	"github.com/lexicality/vending/backend"
 	"github.com/lexicality/vending/hardware"
@@ -13,18 +17,37 @@ const (
 	webRoot = "src/github.com/lexicality/vending/web/www-src"
 )
 
-func main() {
-	setupLogging("Vending")
-	fmt.Println("Hello World")
+func ctrlCHandler(ctx context.Context) context.Context {
+	newCtx, shutdown := context.WithCancel(context.Background())
 
-	hw := hardware.GetHardware(log)
-	err := hw.Setup()
+	c := make(chan os.Signal, 2)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		for {
+			<-c
+			if newCtx.Err() != nil {
+				// Double ^c == GTFO
+				os.Exit(1)
+			} else {
+				log.Info("Shutting down due to SIGINT")
+				shutdown()
+			}
+		}
+	}()
+
+	return newCtx
+}
+
+func main() {
+	ctx := ctrlCHandler(context.Background())
+	setupLogging(ctx, "Vending")
+	log.Info("Hello World")
+
+	hw, err := hardware.SetupHardware(ctx, log)
 	if err != nil {
 		log.Fatalf("Unable to open vending hardware: %s", err)
 	}
-	// TODO: This can error
-	defer hw.Teardown()
 
 	stock := backend.GetFakeStock()
-	web.Server(":80", webRoot, log, stock, hw)
+	web.Server(ctx, ":80", webRoot, log, stock, hw)
 }

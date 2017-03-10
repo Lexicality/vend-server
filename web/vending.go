@@ -1,6 +1,8 @@
 package web
 
 import (
+	"net/http"
+
 	"github.com/go-martini/martini"
 	"github.com/lexicality/vending/backend"
 	"github.com/lexicality/vending/hardware"
@@ -15,8 +17,17 @@ type vendRenderdata struct {
 	Results map[string]vend.Result
 }
 
-func renderVendItem(params martini.Params, r render.Render, log *logging.Logger, stock *backend.Stock, hw hardware.Hardware) {
-	item, err := stock.GetItem(params["ID"])
+func renderVendItem(
+	req *http.Request,
+	params martini.Params,
+	r render.Render,
+	log *logging.Logger,
+	stock *backend.Stock,
+	hw hardware.Hardware,
+) {
+	ctx := req.Context()
+
+	item, err := stock.GetItem(ctx, params["ID"])
 	if err != nil {
 		log.Errorf("Unable to get item details for %s: %s", params["ID"], err)
 		r.HTML(500, "500", nil)
@@ -29,7 +40,8 @@ func renderVendItem(params martini.Params, r render.Render, log *logging.Logger,
 	var result vend.Result
 	if item.CanVend() {
 		// TODO: This ignores hardware availability etc
-		result = hw.Vend(item.Location)
+		// TODO: This should be asynchronous
+		result = hw.Vend(ctx, item.Location)
 	} else {
 		result = vend.ResultEmpty
 	}

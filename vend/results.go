@@ -22,6 +22,8 @@ const (
 	ResultUnknownFailure
 	// ResultInvalidRequest is when you do something stupid
 	ResultInvalidRequest
+	// ResultAborted is when the application shuts down mid-vend
+	ResultAborted
 )
 
 // AllResults is a handy array of all results such as you might want in a template

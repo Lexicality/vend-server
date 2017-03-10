@@ -3,6 +3,8 @@ package backend
 import (
 	"errors"
 
+	"context"
+
 	"github.com/joiggama/money"
 )
 
@@ -127,7 +129,7 @@ func GetFakeStock() *Stock {
 }
 
 // GetAll returns all items currently in the vending machine (available or not)
-func (stock *Stock) GetAll() (items []*StockItem, err error) {
+func (stock *Stock) GetAll(ctx context.Context) (items []*StockItem, err error) {
 	items = make([]*StockItem, len(stock.items))
 	i := 0
 	for _, item := range stock.items {
@@ -139,6 +141,6 @@ func (stock *Stock) GetAll() (items []*StockItem, err error) {
 }
 
 // GetItem returns information specific to a single item
-func (stock *Stock) GetItem(ID string) (item *StockItem, err error) {
+func (stock *Stock) GetItem(ctx context.Context, ID string) (item *StockItem, err error) {
 	return stock.items[ID], nil
 }

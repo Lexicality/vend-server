@@ -1,6 +1,10 @@
 package web
 
 import (
+	"context"
+
+	"net/http"
+
 	"github.com/go-martini/martini"
 	"github.com/lexicality/vending/backend"
 	"github.com/lexicality/vending/hardware"
@@ -13,7 +17,16 @@ func render404(r render.Render) {
 }
 
 // Server runs the web server (!)
-func Server(addr, webRoot string, log *logging.Logger, stock *backend.Stock, hw hardware.Hardware) {
+func Server(
+	ctx context.Context,
+	addr string,
+	webRoot string,
+	log *logging.Logger,
+	stock *backend.Stock,
+	hw hardware.Hardware,
+) {
+	doneC := ctx.Done()
+
 	m := martini.Classic()
 	m.Use(render.Renderer(render.Options{
 		Directory:  webRoot + "/tpl",
@@ -24,6 +37,21 @@ func Server(addr, webRoot string, log *logging.Logger, stock *backend.Stock, hw 
 		Prefix:  "static",
 		Exclude: "/static/tpl/",
 	}))
+
+	// Tell active HTTP requests to stop when we stop
+	m.Use(func(req *http.Request, c martini.Context) {
+		ctx := req.Context()
+		newCtx, cancel := context.WithCancel(ctx)
+		c.Map(req.WithContext(newCtx))
+		go func() {
+			select {
+			case <-doneC:
+				cancel()
+			case <-ctx.Done():
+				// exit
+			}
+		}()
+	})
 	m.Map(stock)
 	m.Map(log)
 	m.Map(hw)
@@ -33,5 +61,16 @@ func Server(addr, webRoot string, log *logging.Logger, stock *backend.Stock, hw 
 	m.Get("/items/:ID/vend", renderVendItem)
 	m.NotFound(render404)
 
-	m.RunOnAddr(addr)
+	server := &http.Server{
+		Handler: m,
+		Addr:    addr,
+	}
+
+	go server.ListenAndServe()
+
+	select {
+	case <-doneC:
+		// TODO: Timeouts?
+		server.Shutdown(context.TODO())
+	}
 }
