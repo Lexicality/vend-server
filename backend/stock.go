@@ -1,10 +1,9 @@
-package main
+package backend
 
 import (
 	"errors"
 
 	"github.com/joiggama/money"
-	"github.com/lexicality/vending/shared/vending"
 )
 
 var (
@@ -25,6 +24,11 @@ type StockItem struct {
 	Location uint8
 }
 
+// CanVend checks stock availability
+func (item *StockItem) CanVend() bool {
+	return item.Quantity != 0 && item.Quantity >= item.Reserved
+}
+
 var mFormatOptions = money.Options{"currency": "GBP"}
 
 // FormattedPrice returns the price as a currency string
@@ -35,18 +39,12 @@ func (item *StockItem) FormattedPrice() string {
 
 // Stock is an interface to the vending machine (possibly could be named better)
 type Stock struct {
-	VendC PubStream
-
 	items map[string]*StockItem
-	vendC chan *vending.SendMessage
 }
 
 func newStock() *Stock {
-	stream := make(chan *vending.SendMessage)
 	return &Stock{
 		items: make(map[string]*StockItem, 14),
-		vendC: stream,
-		VendC: stream,
 	}
 }
 
@@ -143,36 +141,4 @@ func (stock *Stock) GetAll() (items []*StockItem, err error) {
 // GetItem returns information specific to a single item
 func (stock *Stock) GetItem(ID string) (item *StockItem, err error) {
 	return stock.items[ID], nil
-}
-
-// VendItem vends an item
-func (stock *Stock) VendItem(ID string) (result vending.Result, err error) {
-	item, err := stock.GetItem(ID)
-	if err != nil {
-		return
-	} else if item == nil {
-		err = ErrNotAnItem
-		return
-	} else if item.Quantity == 0 || item.Quantity <= item.Reserved {
-		result = vending.ResultEmpty
-		return
-	}
-
-	log.Infof("Vending %s which is at %d", item.Name, item.Location)
-
-	req := &vending.Request{
-		Location: item.Location,
-		ID:       vending.NewMessageID(),
-	}
-	msg := &vending.SendMessage{
-		Type:    "Request",
-		Message: req,
-	}
-
-	stock.vendC <- msg
-
-	// TODO: Verification, reliability, etc
-	result = vending.ResultSuccess
-
-	return
 }

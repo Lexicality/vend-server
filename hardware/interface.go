@@ -1,7 +1,7 @@
-package vendio
+package hardware
 
 import (
-	"github.com/lexicality/vending/shared/vending"
+	"github.com/lexicality/vending/vend"
 	"github.com/op/go-logging"
 )
 
@@ -12,7 +12,7 @@ type Hardware interface {
 	// Teardown closes anything required to set up the GPIO
 	Teardown() error
 	// Vend requests the hardware to vend an item. Blocks until done.
-	Vend(location uint8) vending.Result
+	Vend(location uint8) vend.Result
 }
 
 // GetHardware returns an appropriate Hardware for this system

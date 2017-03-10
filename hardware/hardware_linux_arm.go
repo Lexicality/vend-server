@@ -1,9 +1,9 @@
-package vendio
+package hardware
 
 import (
 	"time"
 
-	"github.com/lexicality/vending/shared/vending"
+	"github.com/lexicality/vending/vend"
 	"github.com/op/go-logging"
 	rpio "github.com/stianeikeland/go-rpio"
 )
@@ -96,13 +96,13 @@ func (hw *hardware) getMotorMode() MotorMode {
 	}
 }
 
-func (hw *hardware) Vend(location uint8) vending.Result {
+func (hw *hardware) Vend(location uint8) vend.Result {
 	if hw.log != nil {
 		hw.log.Infof("~~~I AM VENDING ITEM #%d!", location)
 	}
 
-	if location > vending.MaxLocations {
-		return vending.ResultInvalidRequest
+	if location > vend.MaxLocations {
+		return vend.ResultInvalidRequest
 	}
 
 	// Dump debugging info before starting
@@ -132,15 +132,15 @@ func (hw *hardware) Vend(location uint8) vending.Result {
 	for {
 		select {
 		case <-endTimer.C:
-			return vending.ResultSuccess
+			return vend.ResultSuccess
 		case <-t:
 		case <-checkTicker.C:
 			motorState := hw.getMotorMode()
 			if motorState == MotorJammed {
-				return vending.ResultJammed
+				return vend.ResultJammed
 			} else if motorState == MotorEmpty {
 				// TODO: If it shows up as empty after 29 seconds of not being empty it's probably a successful vend
-				return vending.ResultEmpty
+				return vend.ResultEmpty
 			}
 			// TODO: If the motor state doesn't change to MotorOn then there's a hardware failure somewhere
 		}

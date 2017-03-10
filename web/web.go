@@ -1,16 +1,19 @@
-package main
+package web
 
 import (
 	"github.com/go-martini/martini"
-	"github.com/lexicality/vending/shared/vending"
+	"github.com/lexicality/vending/backend"
+	"github.com/lexicality/vending/hardware"
+	"github.com/lexicality/vending/vend"
 	"github.com/martini-contrib/render"
+	"github.com/op/go-logging"
 )
 
 func render404(r render.Render) {
 	r.HTML(404, "404", nil)
 }
 
-func renderHome(r render.Render, stock *Stock) {
+func renderHome(r render.Render, log *logging.Logger, stock *backend.Stock) {
 	items, err := stock.GetAll()
 	if err != nil {
 		log.Errorf("Unable to get homepage items: %s", err)
@@ -20,7 +23,7 @@ func renderHome(r render.Render, stock *Stock) {
 	r.HTML(200, "home", items)
 }
 
-func renderItem(params martini.Params, r render.Render, stock *Stock) {
+func renderItem(params martini.Params, r render.Render, log *logging.Logger, stock *backend.Stock) {
 	item, err := stock.GetItem(params["ID"])
 	if err != nil {
 		log.Errorf("Unable to get item details for %s: %s", params["ID"], err)
@@ -35,12 +38,12 @@ func renderItem(params martini.Params, r render.Render, stock *Stock) {
 }
 
 type vendRenderdata struct {
-	Item    *StockItem
-	Result  vending.Result
-	Results map[string]vending.Result
+	Item    *backend.StockItem
+	Result  vend.Result
+	Results map[string]vend.Result
 }
 
-func renderVendItem(params martini.Params, r render.Render, stock *Stock) {
+func renderVendItem(params martini.Params, r render.Render, log *logging.Logger, stock *backend.Stock, hw hardware.Hardware) {
 	item, err := stock.GetItem(params["ID"])
 	if err != nil {
 		log.Errorf("Unable to get item details for %s: %s", params["ID"], err)
@@ -51,21 +54,23 @@ func renderVendItem(params martini.Params, r render.Render, stock *Stock) {
 		return
 	}
 
-	result, err := stock.VendItem(params["ID"])
-	if err != nil {
-		log.Errorf("Unable to vend item %s: %s", params["ID"], err)
-		r.HTML(500, "500", nil)
-		return
+	var result vend.Result
+	if item.CanVend() {
+		// TODO: This ignores hardware availability etc
+		result = hw.Vend(item.Location)
+	} else {
+		result = vend.ResultEmpty
 	}
 
 	r.HTML(200, "vend", &vendRenderdata{
 		Item:    item,
 		Result:  result,
-		Results: vending.AllResults,
+		Results: vend.AllResults,
 	})
 }
 
-func webServer(addr, webRoot string, stock *Stock) {
+// Server runs the web server (!)
+func Server(addr, webRoot string, log *logging.Logger, stock *backend.Stock, hw hardware.Hardware) {
 	m := martini.Classic()
 	m.Use(render.Renderer(render.Options{
 		Directory:  webRoot + "/tpl",
@@ -77,10 +82,8 @@ func webServer(addr, webRoot string, stock *Stock) {
 		Exclude: "/static/tpl/",
 	}))
 	m.Map(stock)
-
-	m.Get("/test", func(r render.Render) {
-		r.HTML(200, "test", nil)
-	})
+	m.Map(log)
+	m.Map(hw)
 
 	m.Get("/", renderHome)
 	m.Get("/items/:ID", renderItem)

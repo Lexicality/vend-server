@@ -1,4 +1,4 @@
-package vending
+package vend
 
 // Result represents the result of an attempted vend operation
 type Result uint
