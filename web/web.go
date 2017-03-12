@@ -24,7 +24,7 @@ func Server(
 	log *logging.Logger,
 	stock *backend.Stock,
 	hw hardware.Hardware,
-) {
+) error {
 	doneC := ctx.Done()
 
 	m := martini.Classic()
@@ -66,11 +66,16 @@ func Server(
 		Addr:    addr,
 	}
 
-	go server.ListenAndServe()
+	serverErrC := make(chan error)
+	go func() {
+		serverErrC <- server.ListenAndServe()
+	}()
 
 	select {
+	case err := <-serverErrC:
+		return err
 	case <-doneC:
 		// TODO: Timeouts?
-		server.Shutdown(context.TODO())
+		return server.Shutdown(context.TODO())
 	}
 }

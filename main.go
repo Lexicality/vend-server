@@ -1,6 +1,7 @@
 package main
 
 import (
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -49,5 +50,12 @@ func main() {
 	}
 
 	stock := backend.GetFakeStock()
-	web.Server(ctx, ":80", webRoot, log, stock, hw)
+	err = web.Server(ctx, ":80", webRoot, log, stock, hw)
+	if err == http.ErrServerClosed {
+		log.Infof("HTTP server shut down")
+	} else if err == context.DeadlineExceeded {
+		log.Criticalf("Web server timed out shutting down!")
+	} else if err != nil {
+		log.Fatalf("Web serving error: %s", err)
+	}
 }
