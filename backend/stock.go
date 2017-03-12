@@ -22,7 +22,7 @@ type StockItem struct {
 	Quantity uint8
 	Reserved uint8
 	Image    string
-	Price    int64
+	Price    uint64
 	Location uint8
 }
 
@@ -122,7 +122,7 @@ func GetFakeStock() *Stock {
 		ID:       "c0e26c01-8f37-4a23-a7e9-caf322036ba9",
 		Name:     "Example Item #9",
 		Quantity: 5,
-		Price:    -100,
+		Price:    100,
 		Location: 8,
 		Image:    "lorem-pixel-09.jpg",
 	}
