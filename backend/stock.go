@@ -35,7 +35,7 @@ var mFormatOptions = money.Options{"currency": "GBP"}
 
 // FormattedPrice returns the price as a currency string
 func (item *StockItem) FormattedPrice() string {
-	return money.Format(float64(item.Price)/10, mFormatOptions)
+	return money.Format(float64(item.Price)/100, mFormatOptions)
 
 }
 
