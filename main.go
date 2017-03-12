@@ -13,11 +13,6 @@ import (
 	"github.com/lexicality/vending/web"
 )
 
-const (
-	// Development location of HTML etc etc
-	webRoot = "src/github.com/lexicality/vending/web/www-src"
-)
-
 func ctrlCHandler(ctx context.Context) context.Context {
 	newCtx, shutdown := context.WithCancel(context.Background())
 
@@ -50,7 +45,19 @@ func main() {
 	}
 
 	stock := backend.GetFakeStock()
-	err = web.Server(ctx, ":80", webRoot, log, stock, hw)
+
+	go web.ServeCanonical(":http", "https://vend.lan.london.hackspace.org.uk")
+
+	webServer := &web.Server{
+		// TODO: All of this should be configured by flags / env vars / whatever
+		Addr:        ":https",
+		WebRoot:     "src/github.com/lexicality/vending/web/www-src",
+		ServerName:  "vend.lan.london.hackspace.org.uk",
+		TLSCertFile: "cert.pem",
+		TLSKeyFile:  "key.pem",
+	}
+	err = webServer.ServeHTTP(ctx, log, stock, hw)
+
 	if err == http.ErrServerClosed {
 		log.Infof("HTTP server shut down")
 	} else if err == context.DeadlineExceeded {
