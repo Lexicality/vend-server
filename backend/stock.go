@@ -58,9 +58,9 @@ func GetFakeStock() *Stock {
 		ID:       "c9b2d770-532f-41fc-acf7-e6e682bd82d5",
 		Name:     "Example Item #1",
 		Quantity: 5,
-		Image:    "",
 		Price:    1000,
 		Location: 0,
+		Image:    "lorem-pixel-01.jpg",
 	}
 	stock.items["67fd2453-a2a9-4260-949d-c0f573b4b3ab"] = &StockItem{
 		ID:       "67fd2453-a2a9-4260-949d-c0f573b4b3ab",
@@ -68,6 +68,7 @@ func GetFakeStock() *Stock {
 		Quantity: 50,
 		Price:    333,
 		Location: 1,
+		Image:    "lorem-pixel-02.jpg",
 	}
 	stock.items["47db0c90-e9ff-4b2f-a646-ef259887a89b"] = &StockItem{
 		ID:       "47db0c90-e9ff-4b2f-a646-ef259887a89b",
@@ -75,6 +76,7 @@ func GetFakeStock() *Stock {
 		Quantity: 200,
 		Price:    11133,
 		Location: 2,
+		Image:    "lorem-pixel-03.jpg",
 	}
 	stock.items["aaac9bd8-ac3f-4348-af1c-c211396e3ff9"] = &StockItem{
 		ID:       "aaac9bd8-ac3f-4348-af1c-c211396e3ff9",
@@ -82,6 +84,7 @@ func GetFakeStock() *Stock {
 		Quantity: 5,
 		Price:    50,
 		Location: 3,
+		Image:    "lorem-pixel-04.jpg",
 	}
 	stock.items["552be5d3-ed40-4a2e-bb88-f0319b5f4af1"] = &StockItem{
 		ID:       "552be5d3-ed40-4a2e-bb88-f0319b5f4af1",
@@ -89,6 +92,7 @@ func GetFakeStock() *Stock {
 		Quantity: 5,
 		Price:    100,
 		Location: 4,
+		Image:    "lorem-pixel-05.jpg",
 	}
 	stock.items["ef8e1fc5-8a5d-49fb-baba-37377beead4a"] = &StockItem{
 		ID:       "ef8e1fc5-8a5d-49fb-baba-37377beead4a",
@@ -96,6 +100,7 @@ func GetFakeStock() *Stock {
 		Quantity: 5,
 		Price:    1200,
 		Location: 5,
+		Image:    "lorem-pixel-06.jpg",
 	}
 	stock.items["0840a34d-e024-4e47-a8db-471ac97c6aae"] = &StockItem{
 		ID:       "0840a34d-e024-4e47-a8db-471ac97c6aae",
@@ -103,6 +108,7 @@ func GetFakeStock() *Stock {
 		Quantity: 5,
 		Price:    123456,
 		Location: 6,
+		Image:    "lorem-pixel-07.jpg",
 	}
 	stock.items["193599ed-d1eb-411c-9ecc-e2343256609b"] = &StockItem{
 		ID:       "193599ed-d1eb-411c-9ecc-e2343256609b",
@@ -110,6 +116,7 @@ func GetFakeStock() *Stock {
 		Quantity: 5,
 		Price:    0,
 		Location: 7,
+		Image:    "lorem-pixel-08.jpg",
 	}
 	stock.items["c0e26c01-8f37-4a23-a7e9-caf322036ba9"] = &StockItem{
 		ID:       "c0e26c01-8f37-4a23-a7e9-caf322036ba9",
@@ -117,6 +124,7 @@ func GetFakeStock() *Stock {
 		Quantity: 5,
 		Price:    -100,
 		Location: 8,
+		Image:    "lorem-pixel-09.jpg",
 	}
 	stock.items["b4d6ec03-268c-49d6-ac17-c107b3375014"] = &StockItem{
 		ID:       "b4d6ec03-268c-49d6-ac17-c107b3375014",
@@ -124,6 +132,7 @@ func GetFakeStock() *Stock {
 		Quantity: 0,
 		Price:    1000,
 		Location: 9,
+		Image:    "lorem-pixel-10.jpg",
 	}
 	stock.items["31d1fb41-6af1-4fff-ad2e-1138632a6dab"] = &StockItem{
 		ID:       "31d1fb41-6af1-4fff-ad2e-1138632a6dab",
@@ -131,6 +140,7 @@ func GetFakeStock() *Stock {
 		Quantity: 5,
 		Price:    1,
 		Location: 10,
+		Image:    "lorem-pixel-11.jpg",
 	}
 	stock.items["1bb541b6-b465-445e-8bb3-58688bf40e13"] = &StockItem{
 		ID:       "1bb541b6-b465-445e-8bb3-58688bf40e13",
@@ -138,6 +148,7 @@ func GetFakeStock() *Stock {
 		Quantity: 8,
 		Price:    100,
 		Location: 11,
+		Image:    "lorem-pixel-12.jpg",
 	}
 	return stock
 }

@@ -1,12 +1,12 @@
 <h1>LHS Vending Machine</h1>
-<p>Wooo!
-<h2>Available Items</h2>
-<ul>
+<ul class="home-items">
 {{ range . }}
-    <li>
-        <a href="/items/{{ .ID }}">
-            {{ .Name }} - {{ .FormattedPrice }}
+    <li class="item">
+        <a href="/items/{{ .ID }}" class="link">
+            <span class="name">{{ .Name }}</span>
+            <img src="/static/img/{{ .Image }}" role="presentation" class="image" />
         </a>
+        <span class="price">{{ .FormattedPrice }}</span>
     </li>
 {{ end }}
 </ul>

@@ -1,0 +1,43 @@
+.home-items {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 0;
+    justify-content: space-between;
+}
+
+.home-items > .item {
+    display: block;
+    flex: 0 0 180px;
+    padding: 0;
+    border-bottom: 1px solid lightslategray;
+}
+
+.home-items > .item > .link > .image {
+    display: block;
+    width: 180px;
+    height: 180px;
+}
+
+.item-page > .info {
+    display: flex;
+}
+
+.item-page > .info > .image {
+    display: block;
+    flex: 0 1 auto;
+}
+
+.item-page > .info > .deets {
+    margin: 0 3em;
+    flex: 1 0 auto;
+}
+
+.vend-btn {
+    display: block;
+    width: fit-content;
+    padding: 0.5em 2em;
+    border: 3px solid gray;
+    margin: 1em auto;
+    text-decoration: none;
+    color: gray;
+}

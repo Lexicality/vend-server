@@ -1,8 +1,13 @@
-<h1>{{ .Name}}</h1>
-<dl>
-    <dt>Price</dt>
-    <dd>{{ .FormattedPrice }}</dd>
-    <dt>Amt Left</dt>
-    <dd>{{ .Quantity }}</dd>
-    <a href="/items/{{ .ID }}/vend">420 vend it</a>
-</dl>
+<div class="item-page">
+    <h1 class="name">{{ .Name}}</h1>
+    <div class="info">
+        <img class="image" src="/static/img/{{ .Image }}" role="presentation" class="image" />
+        <dl class="deets">
+            <dt>Price</dt>
+            <dd>{{ .FormattedPrice }}</dd>
+            <dt>Amt Left</dt>
+            <dd>{{ .Quantity }}</dd>
+        </dl>
+    </div>
+    <a class="vend-btn" href="/items/{{ .ID }}/vend">Vend Item</a>
+</div>
