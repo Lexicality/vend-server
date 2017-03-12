@@ -84,6 +84,7 @@ func (srv *Server) ServeHTTP(
 	m.Get("/", renderHome)
 	m.Get("/items/:ID", renderItem)
 	m.Get("/items/:ID/vend", renderVendItem)
+	m.Post("/vend", handleBuy)
 	m.NotFound(render404)
 
 	// Run the actual server

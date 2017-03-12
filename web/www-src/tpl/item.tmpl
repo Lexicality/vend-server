@@ -1,3 +1,5 @@
+{{ $ppkey := "pk_test_V0xfJU1LDvc5hbJTxOaTJnzB" }}
+{{ $host := "vend.lan.london.hackspace.org.uk" }}
 <div class="item-page">
     <h1 class="name">{{ .Name}}</h1>
     <div class="info">
@@ -9,5 +11,20 @@
             <dd>{{ .Quantity }}</dd>
         </dl>
     </div>
-    <a class="vend-btn" href="/items/{{ .ID }}/vend">Vend Item</a>
+    <form action="/vend" method="POST">
+    <input type="hidden" name="item" value="{{ .ID }}" />
+    <script
+        src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+        data-key="{{ $ppkey }}"
+        data-amount="{{ .Price }}"
+        data-name="London Hackspace"
+        data-description="{{ .Name }}"
+        data-image="//{{ $host }}/static/img/{{ .Image }}"
+        data-label="Buy with Stripe"
+        data-locale="auto"
+        data-zip-code="true"
+        data-currency="gbp"
+    >
+    </script>
+    </form>
 </div>

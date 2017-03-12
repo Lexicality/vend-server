@@ -1,12 +1,13 @@
 package main
 
 import (
+	"context"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 
-	"context"
+	stripe "github.com/stripe/stripe-go"
 
 	"github.com/lexicality/vending/backend"
 	"github.com/lexicality/vending/hardware"
@@ -47,6 +48,8 @@ func main() {
 	stock := backend.GetFakeStock()
 
 	go web.ServeCanonical(":http", "https://vend.lan.london.hackspace.org.uk")
+
+	stripe.Key = "sk_test_aB3qhPiZpdnv31WnNmI8DFFR"
 
 	webServer := &web.Server{
 		// TODO: All of this should be configured by flags / env vars / whatever
