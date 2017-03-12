@@ -34,8 +34,9 @@ func Server(
 		Layout:     "layout",
 	}))
 	m.Use(martini.Static(webRoot, martini.StaticOptions{
-		Prefix:  "static",
-		Exclude: "/static/tpl/",
+		Prefix:      "static",
+		Exclude:     "/static/tpl/",
+		SkipLogging: true,
 	}))
 
 	// Tell active HTTP requests to stop when we stop
