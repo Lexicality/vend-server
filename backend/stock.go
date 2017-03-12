@@ -125,6 +125,20 @@ func GetFakeStock() *Stock {
 		Price:    1000,
 		Location: 9,
 	}
+	stock.items["31d1fb41-6af1-4fff-ad2e-1138632a6dab"] = &StockItem{
+		ID:       "31d1fb41-6af1-4fff-ad2e-1138632a6dab",
+		Name:     "Example Item #11",
+		Quantity: 5,
+		Price:    1,
+		Location: 10,
+	}
+	stock.items["1bb541b6-b465-445e-8bb3-58688bf40e13"] = &StockItem{
+		ID:       "1bb541b6-b465-445e-8bb3-58688bf40e13",
+		Name:     "Example Item #12",
+		Quantity: 8,
+		Price:    100,
+		Location: 11,
+	}
 	return stock
 }
 
