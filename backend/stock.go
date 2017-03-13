@@ -1,10 +1,9 @@
 package backend
 
 import (
+	"context"
 	"errors"
 	"sync/atomic"
-
-	"context"
 
 	"github.com/joiggama/money"
 )
@@ -25,6 +24,7 @@ type StockItem struct {
 	Image    string
 	Price    uint64
 	Location uint8
+	Broken   bool
 }
 
 // CanVend checks stock availability
@@ -32,7 +32,7 @@ func (item *StockItem) CanVend() bool {
 	q := atomic.LoadUint32(&item.Quantity)
 	r := atomic.LoadUint32(&item.Reserved)
 	// We can only vend if there are unreserved items available
-	return q > 0 && q > r
+	return q > 0 && q > r && !item.Broken
 }
 
 var mFormatOptions = money.Options{"currency": "GBP"}
@@ -153,6 +153,7 @@ func GetFakeStock() *Stock {
 		Price:    100,
 		Location: 11,
 		Image:    "lorem-pixel-12.jpg",
+		Broken:   true,
 	}
 	return stock
 }
