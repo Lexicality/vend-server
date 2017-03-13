@@ -26,6 +26,12 @@ func render404(r render.Render) {
 	r.HTML(404, "404", nil)
 }
 
+type webContextKey string
+
+var (
+	globalContextKey webContextKey = "global context"
+)
+
 // ServeHTTP runs the web server (!)
 func (srv *Server) ServeHTTP(
 	ctx context.Context,
@@ -47,8 +53,6 @@ func (srv *Server) ServeHTTP(
 		}
 	}
 
-	doneC := ctx.Done()
-
 	// Set up Martini
 	m := martini.Classic()
 	m.Use(render.Renderer(render.Options{
@@ -64,14 +68,15 @@ func (srv *Server) ServeHTTP(
 
 	// Tell active HTTP requests to stop when we stop
 	m.Use(func(req *http.Request, c martini.Context) {
-		ctx := req.Context()
-		newCtx, cancel := context.WithCancel(ctx)
+		reqCtx := req.Context()
+		newCtx, cancel := context.WithCancel(reqCtx)
+		newCtx = context.WithValue(newCtx, globalContextKey, ctx)
 		c.Map(req.WithContext(newCtx))
 		go func() {
 			select {
-			case <-doneC:
-				cancel()
 			case <-ctx.Done():
+				cancel()
+			case <-reqCtx.Done():
 				// exit
 			}
 		}()
@@ -109,7 +114,7 @@ func (srv *Server) ServeHTTP(
 	select {
 	case err := <-serverErrC:
 		return err
-	case <-doneC:
+	case <-ctx.Done():
 		// TODO: Timeouts?
 		return server.Shutdown(context.TODO())
 	}
