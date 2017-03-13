@@ -2,6 +2,7 @@ package backend
 
 import (
 	"errors"
+	"sync/atomic"
 
 	"context"
 
@@ -19,8 +20,8 @@ var (
 type StockItem struct {
 	ID       string
 	Name     string
-	Quantity uint8
-	Reserved uint8
+	Quantity uint32
+	Reserved uint32
 	Image    string
 	Price    uint64
 	Location uint8
@@ -28,7 +29,10 @@ type StockItem struct {
 
 // CanVend checks stock availability
 func (item *StockItem) CanVend() bool {
-	return item.Quantity != 0 && item.Quantity >= item.Reserved
+	q := atomic.LoadUint32(&item.Quantity)
+	r := atomic.LoadUint32(&item.Reserved)
+	// We can only vend if there are unreserved items available
+	return q > 0 && q > r
 }
 
 var mFormatOptions = money.Options{"currency": "GBP"}
