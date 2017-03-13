@@ -41,3 +41,26 @@
     text-decoration: none;
     color: gray;
 }
+
+.item.-unvendable {
+    position: relative;
+}
+
+.item.-unvendable::before,
+.item.-unvendable::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 20px;
+    background: rgba(255,0 , 0, 0.9);
+    top: 46%;
+    left: 0;
+}
+
+.item.-unvendable::after {
+    transform: rotate(-45deg);
+}
+
+.item.-unvendable::before {
+    transform: rotate(45deg);
+}

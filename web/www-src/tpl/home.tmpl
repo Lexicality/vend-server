@@ -1,7 +1,7 @@
 <h1>LHS Vending Machine</h1>
 <ul class="home-items">
 {{ range . }}
-    <li class="item">
+    <li class="item -{{ if .CanVend }}vendable{{ else }}unvendable{{ end }}">
         <a href="/items/{{ .ID }}" class="link">
             <span class="name">{{ .Name }}</span>
             <img src="/static/img/{{ .Image }}" role="presentation" class="image" />
