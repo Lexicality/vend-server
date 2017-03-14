@@ -6,8 +6,9 @@ import (
 	"context"
 	"time"
 
+	logging "github.com/op/go-logging"
+
 	"github.com/lexicality/vending/vend"
-	"github.com/op/go-logging"
 )
 
 type physicalHardware struct {

@@ -3,14 +3,14 @@ package web
 import (
 	"context"
 	"crypto/tls"
-
 	"net/http"
 
 	"github.com/go-martini/martini"
+	"github.com/martini-contrib/render"
+	logging "github.com/op/go-logging"
+
 	"github.com/lexicality/vending/backend"
 	"github.com/lexicality/vending/hardware"
-	"github.com/martini-contrib/render"
-	"github.com/op/go-logging"
 )
 
 // Server represents the web server

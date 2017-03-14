@@ -6,10 +6,9 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	stripe "github.com/stripe/stripe-go"
-
-	"time"
 
 	"github.com/lexicality/vending/backend"
 	"github.com/lexicality/vending/hardware"

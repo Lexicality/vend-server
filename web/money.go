@@ -1,14 +1,13 @@
 package web
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/martini-contrib/render"
 	logging "github.com/op/go-logging"
 	stripe "github.com/stripe/stripe-go"
 	"github.com/stripe/stripe-go/charge"
-
-	"fmt"
 
 	"github.com/lexicality/vending/backend"
 )

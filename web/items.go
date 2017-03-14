@@ -4,9 +4,10 @@ import (
 	"net/http"
 
 	"github.com/go-martini/martini"
-	"github.com/lexicality/vending/backend"
 	"github.com/martini-contrib/render"
 	logging "github.com/op/go-logging"
+
+	"github.com/lexicality/vending/backend"
 )
 
 func renderHome(

@@ -3,8 +3,9 @@ package hardware
 import (
 	"context"
 
+	logging "github.com/op/go-logging"
+
 	"github.com/lexicality/vending/vend"
-	"github.com/op/go-logging"
 )
 
 // Hardware represents the actual vending IO interface

@@ -4,8 +4,9 @@ import (
 	"context"
 	"sync"
 
-	"github.com/lexicality/vending/vend"
 	logging "github.com/op/go-logging"
+
+	"github.com/lexicality/vending/vend"
 )
 
 // Machine is a vending machine

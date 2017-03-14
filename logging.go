@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 
-	"github.com/op/go-logging"
+	logging "github.com/op/go-logging"
 )
 
 var log *logging.Logger

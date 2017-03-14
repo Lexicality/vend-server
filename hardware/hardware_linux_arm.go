@@ -1,13 +1,13 @@
 package hardware
 
 import (
+	"context"
 	"time"
 
-	"context"
+	logging "github.com/op/go-logging"
+	rpio "github.com/stianeikeland/go-rpio"
 
 	"github.com/lexicality/vending/vend"
-	"github.com/op/go-logging"
-	rpio "github.com/stianeikeland/go-rpio"
 )
 
 // Bottom 16 pins starting at physical pin 21

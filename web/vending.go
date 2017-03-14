@@ -4,11 +4,12 @@ import (
 	"net/http"
 
 	"github.com/go-martini/martini"
+	"github.com/martini-contrib/render"
+	logging "github.com/op/go-logging"
+
 	"github.com/lexicality/vending/backend"
 	"github.com/lexicality/vending/hardware"
 	"github.com/lexicality/vending/vend"
-	"github.com/martini-contrib/render"
-	logging "github.com/op/go-logging"
 )
 
 type vendRenderdata struct {
