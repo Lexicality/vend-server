@@ -8,7 +8,7 @@ import (
 )
 
 // Hardware represents the actual vending IO interface
-type Hardware interface {
+type hardware interface {
 	// Setup prepares the GPIO pins etc
 	Setup() error
 	// Teardown closes anything required to set up the GPIO
@@ -18,7 +18,7 @@ type Hardware interface {
 	Vend(ctx context.Context, location uint8) vend.Result
 }
 
-func hwmonitor(ctx context.Context, log *logging.Logger, hw Hardware) {
+func hwmonitor(ctx context.Context, log *logging.Logger, hw hardware) {
 	<-ctx.Done()
 	err := hw.Teardown()
 	if err != nil && log != nil {
@@ -27,7 +27,7 @@ func hwmonitor(ctx context.Context, log *logging.Logger, hw Hardware) {
 }
 
 // SetupHardware configures and returns a Hardware instance
-func SetupHardware(ctx context.Context, log *logging.Logger) (Hardware, error) {
+func setupHardware(ctx context.Context, log *logging.Logger) (hardware, error) {
 	hw := &physicalHardware{
 		log: log,
 	}

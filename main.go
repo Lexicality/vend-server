@@ -9,6 +9,8 @@ import (
 
 	stripe "github.com/stripe/stripe-go"
 
+	"time"
+
 	"github.com/lexicality/vending/backend"
 	"github.com/lexicality/vending/hardware"
 	"github.com/lexicality/vending/web"
@@ -36,11 +38,13 @@ func ctrlCHandler(ctx context.Context) context.Context {
 }
 
 func main() {
+	var err error
 	ctx := ctrlCHandler(context.Background())
 	setupLogging(ctx, "Vending")
 	log.Info("Hello World")
 
-	hw, err := hardware.SetupHardware(ctx, log)
+	hw := hardware.NewMachine(log)
+	err = hw.SetupHardware(ctx)
 	if err != nil {
 		log.Fatalf("Unable to open vending hardware: %s", err)
 	}
@@ -68,4 +72,15 @@ func main() {
 	} else if err != nil {
 		log.Fatalf("Web serving error: %s", err)
 	}
+
+	// Wait for vending machine to finish vending
+	log.Noticef("Waiting for hardware shutdown")
+	hw.Lock()
+	hw.Unlock()
+
+	// Wait for any pending vends that may exist to die
+	log.Noticef("Waiting for context drain")
+	<-time.After(time.Millisecond * 100)
+
+	log.Debug("(✖╭╮✖)")
 }
