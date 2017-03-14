@@ -28,7 +28,7 @@ func hwmonitor(ctx context.Context, log *logging.Logger, hw Hardware) {
 
 // SetupHardware configures and returns a Hardware instance
 func SetupHardware(ctx context.Context, log *logging.Logger) (Hardware, error) {
-	hw := &hardware{
+	hw := &physicalHardware{
 		log: log,
 	}
 

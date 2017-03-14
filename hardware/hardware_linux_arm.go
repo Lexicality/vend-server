@@ -46,11 +46,11 @@ func sprintPinMode(mode rpio.State) string {
 	return "Low"
 }
 
-type hardware struct {
+type physicalHardware struct {
 	log *logging.Logger
 }
 
-func (hw *hardware) Setup() error {
+func (hw *physicalHardware) Setup() error {
 	if hw.log != nil {
 		hw.log.Info("Hello I'm ARM!")
 	}
@@ -71,11 +71,11 @@ func (hw *hardware) Setup() error {
 	return nil
 }
 
-func (hw *hardware) Teardown() error {
+func (hw *physicalHardware) Teardown() error {
 	return rpio.Close()
 }
 
-func (hw *hardware) getMotorMode() MotorMode {
+func (hw *physicalHardware) getMotorMode() MotorMode {
 	highPin := inHigh.Read()
 	lowPin := inLow.Read()
 	if hw.log != nil {
@@ -98,7 +98,7 @@ func (hw *hardware) getMotorMode() MotorMode {
 	}
 }
 
-func (hw *hardware) Vend(ctx context.Context, location uint8) vend.Result {
+func (hw *physicalHardware) Vend(ctx context.Context, location uint8) vend.Result {
 	if hw.log != nil {
 		hw.log.Infof("~~~I AM VENDING ITEM #%d!", location)
 	}
