@@ -3,9 +3,12 @@ package backend
 import (
 	"context"
 	"errors"
+	"fmt"
 	"sync/atomic"
 
 	"github.com/joiggama/money"
+
+	"github.com/lexicality/vending/vend"
 )
 
 var (
@@ -173,4 +176,44 @@ func (stock *Stock) GetAll(ctx context.Context) (items []*StockItem, err error) 
 // GetItem returns information specific to a single item
 func (stock *Stock) GetItem(ctx context.Context, ID string) (item *StockItem, err error) {
 	return stock.items[ID], nil
+}
+
+// ReserveItem indicates that you are queued to vend an item and it's unavailable for other vends
+func (stock *Stock) ReserveItem(ctx context.Context, ID string) (err error) {
+	item, err := stock.GetItem(ctx, ID)
+	if err != nil {
+		return err
+	}
+	atomic.AddUint32(&item.Reserved, 1)
+	return nil
+}
+
+const negativeOne = ^uint32(0)
+
+// UpdateItem updates the stock with the result of your recent vend attempt.
+func (stock *Stock) UpdateItem(ctx context.Context, ID string, status vend.Result) (err error) {
+	item, err := stock.GetItem(ctx, ID)
+	if err != nil {
+		return err
+	}
+
+	switch status {
+	case vend.ResultSuccess:
+		atomic.AddUint32(&item.Quantity, negativeOne)
+		atomic.AddUint32(&item.Reserved, negativeOne)
+	case vend.ResultEmpty:
+		atomic.StoreUint32(&item.Quantity, 0)
+		// Y'all need to get your money back somehow
+		atomic.StoreUint32(&item.Reserved, 0)
+	case vend.ResultAborted:
+		atomic.AddUint32(&item.Reserved, negativeOne)
+	case vend.ResultJammed:
+	case vend.ResultHardwareFailure:
+	case vend.ResultUnknownFailure:
+		item.Broken = true
+	default:
+		return fmt.Errorf("unexpected result %v supplied to UpdateItem", status)
+	}
+
+	return nil
 }
