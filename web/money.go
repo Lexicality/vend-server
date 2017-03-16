@@ -25,7 +25,7 @@ type vendSession struct {
 func (s *vendSession) startVending(
 	ctx context.Context,
 	hw *hardware.Machine,
-	stock *backend.Stock,
+	stock backend.Stock,
 	item *backend.StockItem,
 ) {
 	stock.ReserveItem(ctx, item.ID)
@@ -38,7 +38,7 @@ func (s *vendSession) startVending(
 
 func handleBuy(
 	r render.Render,
-	stock *backend.Stock,
+	stock backend.Stock,
 	hw *hardware.Machine,
 	req *http.Request,
 	log *logging.Logger,

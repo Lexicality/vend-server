@@ -36,7 +36,7 @@ var (
 func (srv *Server) ServeHTTP(
 	ctx context.Context,
 	log *logging.Logger,
-	stock *backend.Stock,
+	stock backend.Stock,
 	hw *hardware.Machine,
 ) error {
 	// Set up tls

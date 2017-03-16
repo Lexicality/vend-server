@@ -23,7 +23,7 @@ func renderVendItem(
 	params martini.Params,
 	r render.Render,
 	log *logging.Logger,
-	stock *backend.Stock,
+	stock backend.Stock,
 	hw *hardware.Machine,
 ) {
 	ctx := req.Context()

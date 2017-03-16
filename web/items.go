@@ -14,7 +14,7 @@ func renderHome(
 	req *http.Request,
 	r render.Render,
 	log *logging.Logger,
-	stock *backend.Stock,
+	stock backend.Stock,
 ) {
 	ctx := req.Context()
 	items, err := stock.GetAll(ctx)
@@ -31,7 +31,7 @@ func renderItem(
 	params martini.Params,
 	r render.Render,
 	log *logging.Logger,
-	stock *backend.Stock,
+	stock backend.Stock,
 ) {
 	ctx := req.Context()
 	item, err := stock.GetItem(ctx, params["ID"])
