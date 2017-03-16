@@ -24,7 +24,7 @@ type vendSession struct {
 // StartVending starts a blocking attempt to vend
 func (s *vendSession) startVending(
 	ctx context.Context,
-	hw *hardware.Machine,
+	hw hardware.Machine,
 	stock backend.Stock,
 	item *backend.StockItem,
 ) {
@@ -39,7 +39,7 @@ func (s *vendSession) startVending(
 func handleBuy(
 	r render.Render,
 	stock backend.Stock,
-	hw *hardware.Machine,
+	hw hardware.Machine,
 	req *http.Request,
 	log *logging.Logger,
 ) {

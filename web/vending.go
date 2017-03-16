@@ -24,7 +24,7 @@ func renderVendItem(
 	r render.Render,
 	log *logging.Logger,
 	stock backend.Stock,
-	hw *hardware.Machine,
+	hw hardware.Machine,
 ) {
 	ctx := req.Context()
 

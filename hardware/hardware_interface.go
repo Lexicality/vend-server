@@ -2,42 +2,30 @@ package hardware
 
 import (
 	"context"
+	"sync"
 
 	logging "github.com/op/go-logging"
 
 	"github.com/lexicality/vending/vend"
 )
 
-// Hardware represents the actual vending IO interface
-type hardware interface {
-	// Setup prepares the GPIO pins etc
-	Setup() error
-	// Teardown closes anything required to set up the GPIO
-	Teardown() error
+// Machine is a cross-platform way of using the vending machine
+type Machine interface {
+	// The Machine will be locked whenever vending, exposed for when actions need to wait for the current vend.
+	sync.Locker
+	// Setup configures the machine to do things, and sets up a handler to stop doing things when the context closes.
+	// If it returns an error all following vends will fail.
+	Setup(ctx context.Context) error
 	// Vend requests the hardware to vend an item. Blocks until done.
-	// If the passed context has a deadline sooner than the expected vend time it aborts immediately. (Cannot be canceled)
+	// If a second request comes in while the first is processing that will block too.
+	// Vend respects context deadlines / cancels before the physical vend action starts,
+	//  but will not abort once in progress to avoid becoming physically out of sync.
 	Vend(ctx context.Context, location uint8) vend.Result
 }
 
-func hwmonitor(ctx context.Context, log *logging.Logger, hw hardware) {
-	<-ctx.Done()
-	err := hw.Teardown()
-	if err != nil && log != nil {
-		log.Criticalf("Unable to free HW data: %s", err)
-	}
-}
-
-// SetupHardware configures and returns a Hardware instance
-func setupHardware(ctx context.Context, log *logging.Logger) (hardware, error) {
-	hw := &physicalHardware{
+// NewMachine returns this platform's vending options
+func NewMachine(log *logging.Logger) Machine {
+	return &physicalHardware{
 		log: log,
 	}
-
-	err := hw.Setup()
-	if err != nil {
-		return nil, err
-	}
-	go hwmonitor(ctx, log, hw)
-
-	return hw, nil
 }

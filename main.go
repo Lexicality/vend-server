@@ -43,7 +43,7 @@ func main() {
 	log.Info("Hello World")
 
 	hw := hardware.NewMachine(log)
-	err = hw.SetupHardware(ctx)
+	err = hw.Setup(ctx)
 	if err != nil {
 		log.Fatalf("Unable to open vending hardware: %s", err)
 	}

@@ -7,6 +7,8 @@ import (
 	logging "github.com/op/go-logging"
 	rpio "github.com/stianeikeland/go-rpio"
 
+	"sync"
+
 	"github.com/lexicality/vending/vend"
 )
 
@@ -47,10 +49,11 @@ func sprintPinMode(mode rpio.State) string {
 }
 
 type physicalHardware struct {
+	sync.Mutex
 	log *logging.Logger
 }
 
-func (hw *physicalHardware) Setup() error {
+func (hw *physicalHardware) Setup(ctx context.Context) error {
 	if hw.log != nil {
 		hw.log.Info("Hello I'm ARM!")
 	}
@@ -59,6 +62,7 @@ func (hw *physicalHardware) Setup() error {
 	if err != nil {
 		return err
 	}
+	go hw.deferredTeardown(ctx)
 
 	for _, pin := range outPins {
 		pin.Output()
@@ -71,8 +75,12 @@ func (hw *physicalHardware) Setup() error {
 	return nil
 }
 
-func (hw *physicalHardware) Teardown() error {
-	return rpio.Close()
+func (hw *physicalHardware) deferredTeardown(ctx context.Context) {
+	<-ctx.Done()
+	err := rpio.Close()
+	if err != nil && hw.log != nil {
+		hw.log.Criticalf("Unable to free HW data: %s", err)
+	}
 }
 
 func (hw *physicalHardware) getMotorMode() MotorMode {
@@ -99,15 +107,27 @@ func (hw *physicalHardware) getMotorMode() MotorMode {
 }
 
 func (hw *physicalHardware) Vend(ctx context.Context, location uint8) vend.Result {
-	if hw.log != nil {
-		hw.log.Infof("~~~I AM VENDING ITEM #%d!", location)
-	}
+	hw.Lock()
+	defer hw.Unlock()
 
-	if location > vend.MaxLocations {
+	err := ctx.Err()
+	if err != nil {
+		if hw.log != nil {
+			hw.log.Warningf("Canceling vend attempt: %s", err)
+		}
+		return vend.ResultAborted
+	} else if location > vend.MaxLocations {
 		return vend.ResultInvalidRequest
 	} else if dl, ok := ctx.Deadline(); ok && dl.Before(time.Now().Add(VendTime)) {
 		// Don't even try and do anything if we're going to be aborted before we can vend
+		if hw.log != nil {
+			hw.log.Warningf("Canceling vend attempt as it would have timed out the context")
+		}
 		return vend.ResultAborted
+	}
+
+	if hw.log != nil {
+		hw.log.Infof("~~~I AM VENDING ITEM #%d!", location)
 	}
 
 	// Dump debugging info before starting
