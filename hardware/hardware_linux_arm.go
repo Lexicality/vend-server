@@ -50,7 +50,8 @@ func sprintPinMode(mode rpio.State) string {
 
 type physicalHardware struct {
 	sync.Mutex
-	log *logging.Logger
+	log    *logging.Logger
+	broken bool
 }
 
 func (hw *physicalHardware) Setup(ctx context.Context) error {
@@ -60,6 +61,7 @@ func (hw *physicalHardware) Setup(ctx context.Context) error {
 
 	err := rpio.Open()
 	if err != nil {
+		hw.broken = true
 		return err
 	}
 	go hw.deferredTeardown(ctx)
@@ -107,6 +109,10 @@ func (hw *physicalHardware) getMotorMode() MotorMode {
 }
 
 func (hw *physicalHardware) Vend(ctx context.Context, location uint8) vend.Result {
+	if hw.broken {
+		return vend.ResultHardwareFailure
+	}
+
 	hw.Lock()
 	defer hw.Unlock()
 
