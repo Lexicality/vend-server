@@ -31,3 +31,24 @@ var AllResults = map[string]Result{
 	"ResultUnknownFailure":  ResultUnknownFailure,
 	"ResultInvalidRequest":  ResultInvalidRequest,
 }
+
+func (res Result) String() string {
+	switch res {
+	case ResultSuccess:
+		return "Success"
+	case ResultEmpty:
+		return "Empty"
+	case ResultJammed:
+		return "Jammed"
+	case ResultHardwareFailure:
+		return "Hardware Failure"
+	case ResultUnknownFailure:
+		return "Unknown Failure"
+	case ResultAborted:
+		return "Aborted before vend start"
+	case ResultInvalidRequest:
+		return "Invalid Location"
+	default:
+		return "Invalid Result"
+	}
+}
