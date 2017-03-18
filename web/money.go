@@ -28,8 +28,6 @@ func (s *vendSession) startVending(
 	stock backend.Stock,
 	item *backend.StockItem,
 ) {
-	stock.ReserveItem(ctx, item.ID)
-
 	res := hw.Vend(ctx, item.Location)
 	s.State = res
 
@@ -52,14 +50,36 @@ func handleBuy(
 	user := req.PostFormValue("stripeEmail")
 	token := req.FormValue("stripeToken")
 
-	item, err := stock.GetItem(reqCtx, itemID)
-	if err != nil {
+	err := stock.ReserveItem(reqCtx, itemID)
+	if err == backend.ErrNotAnItem {
+		r.Text(http.StatusBadRequest, "not item")
+		return
+	} else if err == backend.ErrItemBroken {
+		// TODO: wat say + status code
+		r.Text(http.StatusServiceUnavailable, "lp0 on fire")
+		return
+	} else if err == backend.ErrItemEmpty {
+		// TODO: wat say + status code
+		r.Text(http.StatusServiceUnavailable, "items empty soz")
+		return
+	} else if err != nil {
 		log.Errorf("Unable to retrieve item %s: %s", itemID, err)
 		r.HTML(500, "500", nil)
 		return
-	} else if item == nil {
-		log.Warningf("Got payment request from %s for non-existant item %s", user, itemID)
-		r.Text(400, "??? Missing item")
+	}
+
+	abortReserve := func() {
+		err := stock.UpdateItem(context.TODO(), itemID, vend.ResultAborted)
+		if err != nil {
+			log.Criticalf("Failed to abort item %s: %s", itemID, err)
+		}
+	}
+
+	item, err := stock.GetItem(reqCtx, itemID)
+	if err != nil || item == nil {
+		log.Errorf("Unable to retrieve item %s: %s", itemID, err)
+		abortReserve()
+		r.HTML(500, "500", nil)
 		return
 	}
 

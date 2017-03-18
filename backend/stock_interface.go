@@ -10,9 +10,11 @@ import (
 
 var (
 	// ErrNotAnItem is what happens if you try to vend an item what not be there
-	ErrNotAnItem = errors.New("Item does not exist")
+	ErrNotAnItem = errors.New("invalid item ID")
 	// ErrItemEmpty is if you vend something that's out
-	ErrItemEmpty = errors.New("Item has no Quantity")
+	ErrItemEmpty = errors.New("no stock available")
+	// ErrItemBroken in if you vend something that's
+	ErrItemBroken = errors.New("item is jammed")
 )
 
 // StockItem represents the current state of an item in the vending machine.

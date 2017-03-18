@@ -199,6 +199,7 @@ func (stock *FakeStock) GetItem(ctx context.Context, ID string) (*StockItem, err
 }
 
 // ReserveItem indicates that you are queued to vend an item and it's unavailable for other vends
+// TODO: This should probably have a saner way of exhibiting reservations (eg grants?)
 func (stock *FakeStock) ReserveItem(ctx context.Context, ID string) error {
 	item := stock.lookupItem(ID)
 	if item == nil {
@@ -206,7 +207,9 @@ func (stock *FakeStock) ReserveItem(ctx context.Context, ID string) error {
 	}
 
 	item.RLock()
-	if item.Quantity == 0 {
+	if item.Broken {
+		return ErrItemBroken
+	} else if !item.CanVend() {
 		return ErrItemEmpty
 	}
 	item.RUnlock()
