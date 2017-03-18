@@ -37,11 +37,12 @@ func (s *vendSession) startVending(
 }
 
 func handleBuy(
+	req *http.Request,
 	r render.Render,
+	log *logging.Logger,
+
 	stock backend.Stock,
 	hw hardware.Machine,
-	req *http.Request,
-	log *logging.Logger,
 ) {
 	ctx := req.Context()
 
