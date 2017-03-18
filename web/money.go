@@ -44,14 +44,15 @@ func handleBuy(
 	stock backend.Stock,
 	hw hardware.Machine,
 ) {
-	ctx := req.Context()
+	reqCtx := req.Context()
+	globalCtx := reqCtx.Value(globalContextKey).(context.Context)
 
 	// TODO: Parse & validate
 	itemID := req.PostFormValue("item")
 	user := req.PostFormValue("stripeEmail")
 	token := req.FormValue("stripeToken")
 
-	item, err := stock.GetItem(ctx, itemID)
+	item, err := stock.GetItem(reqCtx, itemID)
 	if err != nil {
 		log.Errorf("Unable to retrieve item %s: %s", itemID, err)
 		r.HTML(500, "500", nil)
@@ -70,11 +71,20 @@ func handleBuy(
 	params.AddMeta("user", user)
 	params.SetSource(token)
 
+	// At this point reqCtx is inaproprate since this needs to continue even if the user closes the page
+	// However we probably don't want to stop *now* since money is happening.
 	charge, err := charge.New(params)
 
 	if err != nil {
 		log.Debugf("OMG ERROR %+v %s", err, err)
 		r.Text(500, err.Error())
+		return
+	}
+
+	if globalCtx.Err() != nil {
+		// um
+		log.Criticalf("Bailing out of incomplete vend due to context closing: %s", globalCtx.Err())
+		r.Text(503, "Please contact the trustees")
 		return
 	}
 
@@ -84,7 +94,7 @@ func handleBuy(
 		State: vend.NoResult,
 	}
 	go vs.startVending(
-		ctx,
+		globalCtx,
 		hw,
 		stock,
 		item,
