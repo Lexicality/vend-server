@@ -38,6 +38,7 @@ func (srv *Server) ServeHTTP(
 	log *logging.Logger,
 	stock backend.Stock,
 	hw hardware.Machine,
+	txns backend.Transactions,
 ) error {
 	// Set up tls
 	var tlsCFG *tls.Config
@@ -84,6 +85,7 @@ func (srv *Server) ServeHTTP(
 	m.Map(stock)
 	m.Map(log)
 	m.Map(hw)
+	m.Map(txns)
 
 	// Set up the route handlers
 	m.Get("/", renderHome)

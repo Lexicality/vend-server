@@ -48,6 +48,8 @@ func main() {
 		log.Fatalf("Unable to open vending hardware: %s", err)
 	}
 
+	txns := backend.NewFakeTransactions(ctx)
+
 	stock := backend.GetFakeStock()
 
 	go web.ServeCanonical(":http", "https://vend.lan.london.hackspace.org.uk")
@@ -62,7 +64,7 @@ func main() {
 		TLSCertFile: "cert.pem",
 		TLSKeyFile:  "key.pem",
 	}
-	err = webServer.ServeHTTP(ctx, log, stock, hw)
+	err = webServer.ServeHTTP(ctx, log, stock, hw, txns)
 
 	if err == http.ErrServerClosed {
 		log.Infof("HTTP server shut down")
