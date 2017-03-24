@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/go-martini/martini"
 	"github.com/martini-contrib/render"
 	logging "github.com/op/go-logging"
 	stripe "github.com/stripe/stripe-go"
@@ -138,5 +139,34 @@ func handleBuy(
 		}
 	}()
 
-	r.Text(200, fmt.Sprintf("%+v", charge))
+	r.Redirect(fmt.Sprintf("/txns/%s", txn.ID), http.StatusSeeOther)
+	// r.Text(200, fmt.Sprintf("%+v", charge))
+}
+
+func handleTXNInfo(
+	req *http.Request,
+	r render.Render,
+	params martini.Params,
+
+	log *logging.Logger,
+
+	txns backend.Transactions,
+) {
+	reqCtx := req.Context()
+
+	// TODO: Validate
+	txnID := params["ID"]
+
+	txn, err := txns.Get(reqCtx, txnID)
+	if err != nil {
+		log.Errorf("Unable to fetch transaction %s: %s", txnID, err)
+		r.HTML(http.StatusInternalServerError, "500", nil)
+		return
+	} else if txn == nil {
+		r.HTML(http.StatusNotFound, "404", nil)
+		return
+	}
+
+	r.JSON(http.StatusOK, txn)
+	return
 }
