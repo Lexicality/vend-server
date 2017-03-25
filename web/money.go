@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/go-martini/martini"
 	"github.com/martini-contrib/render"
@@ -143,7 +144,7 @@ func handleBuy(
 	// r.Text(200, fmt.Sprintf("%+v", charge))
 }
 
-func handleTXNInfo(
+func handleTXNView(
 	req *http.Request,
 	r render.Render,
 	params martini.Params,
@@ -166,6 +167,42 @@ func handleTXNInfo(
 		r.HTML(http.StatusNotFound, "404", nil)
 		return
 	}
+
+	r.HTML(200, "txn", txn)
+}
+
+func handleTXNJSON(
+	req *http.Request,
+	r render.Render,
+	params martini.Params,
+
+	log *logging.Logger,
+
+	txns backend.Transactions,
+) {
+	reqCtx := req.Context()
+
+	// TODO: Validate
+	txnID := params["ID"]
+
+	txn, err := txns.Get(reqCtx, txnID)
+	if err != nil {
+		log.Errorf("Unable to fetch transaction %s: %s", txnID, err)
+		r.HTML(http.StatusInternalServerError, "500", nil)
+		return
+	} else if txn == nil {
+		r.HTML(http.StatusNotFound, "404", nil)
+		return
+	}
+
+	// Avoid browser default caching shenanigans
+	var cacheControl string
+	if txn.State == backend.TransactionPaid || txn.State == backend.TransactionPending {
+		cacheControl = "no-cache"
+	} else {
+		cacheControl = fmt.Sprintf("public, max-age=%.f", (time.Hour * 24).Seconds())
+	}
+	r.Header().Set("Cache-control", cacheControl)
 
 	r.JSON(http.StatusOK, txn)
 	return

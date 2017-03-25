@@ -1,0 +1,16 @@
+<h1>Order Status</h1>
+{{ $status := .State.String }}
+{{ if eq $status "Complete" }}
+<p id="txn-state">Successfully Vended!</p>
+{{ else if eq $status "Failed" }}
+<p id="txn-state">Unable to vend: {{ .Reason }}</p>
+{{ else if eq $status "Rejected" }}
+<p id="txn-state">Your payment was declined: {{ .Reason }}</p>
+{{ else if eq $status "Paid" }}
+<p id="txn-state">Your payment has been cleared and your item will vend soon.</p>
+<script type="application/json" id="transaction-data">{{ . }}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="/static/js/vend.js"></script>
+{{ else }}
+<p id="txn-state">Invalid state?</p>
+{{ end }}
